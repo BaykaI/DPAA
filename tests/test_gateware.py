@@ -40,6 +40,44 @@ def test_engine_bit_exact(tmp_path, ni_log2, no_log2):
     assert np.array_equal(got, ref)
 
 
+def test_engine_bank_switching(tmp_path):
+    """Частичная смена таблиц, запись во время копирования банков и повторный commit."""
+    rng = np.random.default_rng(5)
+    ni, no, t, sw1, sw2 = 2, 16, 240, 80, 160
+    x = np.stack([bandpass_noise(t / hw.FS, hw.FS, 300, 9000, rng=rng) for _ in range(ni)])
+    x = np.round(x / np.abs(x).max() * 0.5 * 2**17).astype(np.int64)
+    d1 = rng.integers(3 * 32, 150 * 32, size=(no, ni))
+    g1 = rng.integers(-2**16, 2**16, size=(no, ni))
+
+    def word(sel, idx, val):
+        return (sel << 31) | (idx << 24) | (int(val) & 0xFFFFFF)
+
+    cfg1 = [word(0, o * ni + i, d1[o, i]) for o in range(no) for i in range(ni)]
+    cfg1 += [word(1, o * ni + i, g1[o, i]) for o in range(no) for i in range(ni)]
+    d2, g2 = d1.copy(), g1.copy()
+    cfg2 = []
+    for o in (0, 5, 11):                        # меняем только часть таблицы
+        d2[o, 1] = 200 * 32 + 7
+        g2[o, 0] = -30000
+        cfg2 += [word(0, o * ni + 1, d2[o, 1]), word(1, o * ni + 0, g2[o, 0])]
+    d3, g3 = d2.copy(), g2.copy()
+    g3[7, 1] = 50000                              # запись во время копирования банков
+    extra = word(1, 7 * ni + 1, g3[7, 1])
+
+    sim.write_mem(tmp_path / "cfg.hex", cfg1, 32)
+    sim.write_mem(tmp_path / "cfg2.hex", cfg2, 32)
+    sim.write_mem(tmp_path / "in.hex", x.T, 18)
+    vvp = sim.build("tb_engine", ["delay_sum_engine.v"], tmp_path, {"NI_LOG2": 1, "NO_LOG2": 4, "OUT_SHL": 6})
+    sim.run(vvp, {"CFG": tmp_path / "cfg.hex", "IN": tmp_path / "in.hex", "OUT": tmp_path / "out.txt",
+                  "NCFG": len(cfg1), "NFR": t, "CFG2": tmp_path / "cfg2.hex", "NCFG2": len(cfg2),
+                  "SW1": sw1, "SW2": sw2, "EXTRA": f"{extra:08x}"})
+    got, _ = sim.read_rows(tmp_path / "out.txt")
+    refs = [hw.engine_model(x, d, g, out_shl=6).T for d, g in ((d1, g1), (d2, g2), (d3, g3))]
+    assert np.array_equal(got[:sw1], refs[0][:sw1])
+    assert np.array_equal(got[sw1:sw2], refs[1][sw1:sw2])      # EXTRA ещё не активна
+    assert np.array_equal(got[sw2:], refs[2][sw2:])            # и не потерялась
+
+
 def test_fd_coefficients_accuracy():
     """Модель ядра с единичным весом ≈ идеальная дробная задержка (ошибка < -60 дБ)."""
     t = 2000

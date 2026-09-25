@@ -27,7 +27,21 @@ module tb_engine;
     reg [31:0] cfg_mem [0:4095];
     reg [17:0] in_mem  [0:1048575];
     integer ncfg, nfr, fo, n, i, o;
-    reg [1023:0] fcfg, fin, fout;
+    integer ncfg2 = 0, sw1 = -1, sw2 = -1;
+    reg [31:0] extra = 0;
+    reg [31:0] cfg2_mem [0:4095];
+    reg [1023:0] fcfg, fin, fout, fcfg2;
+
+    task cfg_write(input [31:0] w);
+        begin
+            cfg_we   <= 1;
+            cfg_sel  <= w[31];
+            cfg_idx  <= w[30:24];
+            cfg_data <= w[23:0];
+            @(posedge clk);
+            cfg_we <= 0;
+        end
+    endtask
 
     initial begin
         if (!$value$plusargs("CFG=%s", fcfg)) $fatal(1, "no CFG");
@@ -36,6 +50,15 @@ module tb_engine;
         if (!$value$plusargs("NCFG=%d", ncfg)) $fatal(1, "no NCFG");
         if (!$value$plusargs("NFR=%d", nfr)) $fatal(1, "no NFR");
         $readmemh(fcfg, cfg_mem);
+        // необязательно: вторая таблица (частичная) с commit перед кадром SW1,
+        // запись EXTRA во время копирования банков в кадре SW1 и commit перед кадром SW2
+        if ($value$plusargs("CFG2=%s", fcfg2)) begin
+            $readmemh(fcfg2, cfg2_mem);
+            if (!$value$plusargs("NCFG2=%d", ncfg2)) $fatal(1, "no NCFG2");
+            if (!$value$plusargs("SW1=%d", sw1)) $fatal(1, "no SW1");
+            if (!$value$plusargs("SW2=%d", sw2)) $fatal(1, "no SW2");
+            if (!$value$plusargs("EXTRA=%h", extra)) $fatal(1, "no EXTRA");
+        end
         $readmemh(fin, in_mem);
         fo = $fopen(fout, "w");
         repeat (5) @(posedge clk);
@@ -53,11 +76,23 @@ module tb_engine;
         @(posedge clk);
         commit <= 0;
         for (n = 0; n < nfr; n = n + 1) begin
+            if (n == sw1) begin
+                for (i = 0; i < ncfg2; i = i + 1) cfg_write(cfg2_mem[i]);
+                commit <= 1; @(posedge clk); commit <= 0;
+            end
+            if (n == sw2) begin
+                commit <= 1; @(posedge clk); commit <= 0;
+            end
             for (i = 0; i < NI; i = i + 1)
                 in_data[i*18 +: 18] <= in_mem[n*NI + i];
             tick <= 1;
             @(posedge clk);
             tick <= 0;
+            if (n == sw1) begin
+                @(posedge clk);          // идёт копирование банков
+                if (dut.st != 3'd4) $fatal(1, "expected bank copy in progress");
+                cfg_write(extra);
+            end
             @(posedge done);
             @(posedge clk);
             for (o = 0; o < NO; o = o + 1)

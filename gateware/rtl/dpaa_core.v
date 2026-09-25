@@ -88,8 +88,8 @@ module dpaa_core #(
         .out_data(tx_out), .done(tx_done));
 
     wire [16*24-1:0] tx_gated = tx_en ? tx_out : {16*24{1'b0}};
-    i2s_tx #(.NLINES(16)) u_i2s_tx (.clk(clk), .bit_start(bit_start), .bit_idx(bit_idx),
-        .left(tx_gated), .right(tx_gated), .sd(txd));
+    i2s_tx #(.NLINES(16), .MONO(1)) u_i2s_tx (.clk(clk), .bit_start(bit_start), .bit_idx(bit_idx),
+        .left(tx_gated), .right({16*24{1'b0}}), .sd(txd));
 
     // ---------------- приём: 16 микрофонов + калибровочный ----------------
     wire [17*24-1:0] mic;

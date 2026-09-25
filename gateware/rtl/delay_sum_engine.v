@@ -10,8 +10,10 @@
 // Дробная часть реализуется 8-отводным КИХ-фильтром (32 набора коэффициентов,
 // Q2.16, рассчитаны методом наименьших квадратов — см. dpaa/hw.py).
 // Вес g — 18 бит со знаком, Q2.16 (65536 = 1.0).
-// Таблицы пишутся в теневые регистры и применяются атомарно в начале кадра
-// после строба commit — луч переключается без «разрыва».
+// Таблицы хранятся в блочной памяти в двух банках: запись идёт в неактивный банк,
+// по стробу commit банки меняются местами в начале кадра (луч переключается без
+// «разрыва»), затем новый активный банк копируется в неактивный (NT тактов), чтобы
+// последующие частичные изменения опирались на актуальную таблицу.
 //
 // Вычисление: конвейер на одном умножителе для отводов и одном для весов,
 // NO*NI*8 + ~10 тактов на кадр (TX: 264, RX: 264 из 1024 доступных).
@@ -41,24 +43,35 @@ module delay_sum_engine #(
     localparam NT = 1 << TL;
     localparam [15:0] DELAY_INIT = 16'd256;  // 8.0 отсчёта — луч по нормали
 
-    // ---- таблицы ----
-    reg [15:0]        dly_sh [0:NT-1];
-    reg [15:0]        dly    [0:NT-1];
-    reg signed [17:0] gn_sh  [0:NT-1];
-    reg signed [17:0] gn     [0:NT-1];
-    reg commit_pending;
+    // ---- таблицы: 2 банка в памяти ----
+    reg [15:0]        tdly [0:2*NT-1];
+    reg signed [17:0] tgn  [0:2*NT-1];
     integer t;
+    initial for (t = 0; t < 2*NT; t = t + 1) begin
+        tdly[t] = DELAY_INIT;
+        tgn[t]  = ((t % NI) == 0) ? GAIN_IN0 : GAIN_OTHER;
+    end
+    reg commit_pending;
+    reg act;                                  // активный банк
 
-    always @(posedge clk)
-        if (rst) begin
-            for (t = 0; t < NT; t = t + 1) begin
-                dly_sh[t] <= DELAY_INIT;
-                gn_sh[t]  <= ((t % NI) == 0) ? GAIN_IN0 : GAIN_OTHER;
-            end
-        end else if (cfg_we) begin
-            if (cfg_sel) gn_sh[cfg_idx]  <= cfg_data[17:0];
-            else         dly_sh[cfg_idx] <= cfg_data[15:0];
-        end
+    // порты памяти таблиц (по одному порту записи и чтения на таблицу)
+    reg          td_we, tg_we;
+    reg [TL:0]   td_wa, tg_wa, td_ra, tg_ra;
+    reg [15:0]   td_wd;
+    reg signed [17:0] tg_wd;
+    reg [15:0]   td_q;
+    reg signed [17:0] tg_q;
+    always @(posedge clk) begin
+        if (td_we) tdly[td_wa] <= td_wd;
+        if (tg_we) tgn[tg_wa]  <= tg_wd;
+        td_q <= tdly[td_ra];
+        tg_q <= tgn[tg_ra];
+    end
+
+    // очередь записей настройки (запись откладывается, пока идёт копирование банков)
+    reg [TL+24:0] q_mem [0:3];                // {sel, idx, data}
+    reg [1:0]     q_wp, q_rp;
+    reg [2:0]     q_n;
 
     // ---- буфер отсчётов и ПЗУ коэффициентов ----
     reg signed [17:0] mem  [0:NI*(1<<DEPTH_LOG2)-1];
@@ -78,8 +91,9 @@ module delay_sum_engine #(
     end
 
     // ---- управление ----
-    localparam S_IDLE = 2'd0, S_WRITE = 2'd1, S_RUN = 2'd2, S_DRAIN = 2'd3;
-    reg [1:0]            st;
+    localparam S_IDLE = 3'd0, S_WRITE = 3'd1, S_RUN = 3'd2, S_DRAIN = 3'd3, S_COPY = 3'd4;
+    reg [2:0]            st;
+    reg [TL:0]           ccnt;
     reg [(NI*18)-1:0]    in_lat;
     reg [DEPTH_LOG2-1:0] wptr;
     reg [NI_LOG2:0]      wcnt;
@@ -88,7 +102,7 @@ module delay_sum_engine #(
     reg [3:0]            drain;
 
     // выдача адресов (стадия A)
-    wire [15:0]            d_cur = dly[ti];
+    wire [15:0]            d_cur = td_q;      // задержка текущего члена (читается заранее)
     wire [DEPTH_LOG2-1:0]  rptr  = wptr - d_cur[DEPTH_LOG2+4:5] + 3 - k;
 
     // конвейер
@@ -106,6 +120,46 @@ module delay_sum_engine #(
     wire signed [17:0] y_sat = (y_sh > 23'sd131071)  ?  18'sd131071 :
                                (y_sh < -23'sd131072) ? -18'sd131072 : y_sh[17:0];
 
+    // адреса чтения таблиц
+    wire [TL-1:0] ti_next = (st == S_RUN) ? ((k == 7) ? ti + 1'b1 : ti) : {TL{1'b0}};
+    always @(*) begin
+        td_ra = (st == S_COPY) ? {act, ccnt[TL-1:0]} : {act, ti_next};
+        tg_ra = (st == S_COPY) ? {act, ccnt[TL-1:0]} : {act, b_ti};
+    end
+
+    // порт записи: копирование банков важнее, иначе — запись из очереди
+    wire          copy_wr = (st == S_COPY) && (ccnt != 0);
+    wire [TL+24:0] q_head = q_mem[q_rp];
+    wire          q_pop   = !copy_wr && (q_n != 0);
+    always @(*) begin
+        td_we = 1'b0; tg_we = 1'b0;
+        td_wa = {~act, ccnt[TL-1:0] - 1'b1};
+        tg_wa = {~act, ccnt[TL-1:0] - 1'b1};
+        td_wd = td_q; tg_wd = tg_q;
+        if (copy_wr) begin
+            td_we = 1'b1; tg_we = 1'b1;
+        end else if (q_pop) begin
+            td_wa = {~act, q_head[TL+23:24]};
+            tg_wa = {~act, q_head[TL+23:24]};
+            td_wd = q_head[15:0];
+            tg_wd = q_head[17:0];
+            if (q_head[TL+24]) tg_we = 1'b1;
+            else               td_we = 1'b1;
+        end
+    end
+
+    always @(posedge clk)
+        if (rst) begin
+            q_wp <= 0; q_rp <= 0; q_n <= 0;
+        end else begin
+            if (cfg_we) begin
+                q_mem[q_wp] <= {cfg_sel, cfg_idx, cfg_data};
+                q_wp <= q_wp + 1'b1;
+            end
+            if (q_pop) q_rp <= q_rp + 1'b1;
+            q_n <= q_n + (cfg_we ? 3'd1 : 3'd0) - (q_pop ? 3'd1 : 3'd0);
+        end
+
     integer o;
     reg signed [35:0] osh;
     always @(posedge clk) begin
@@ -116,12 +170,10 @@ module delay_sum_engine #(
             st <= S_IDLE;
             wptr <= 0;
             commit_pending <= 1'b0;
+            act <= 1'b0;
             r_v <= 1'b0; b_v <= 1'b0; c_v <= 1'b0; d_v <= 1'b0;
+            b_ti <= 0;
             out_data <= 0;
-            for (t = 0; t < NT; t = t + 1) begin
-                dly[t] <= DELAY_INIT;
-                gn[t]  <= ((t % NI) == 0) ? GAIN_IN0 : GAIN_OTHER;
-            end
         end else begin
             if (commit) commit_pending <= 1'b1;
             case (st)
@@ -131,13 +183,17 @@ module delay_sum_engine #(
                     wcnt   <= 0;
                     st     <= S_WRITE;
                     for (o = 0; o < NO; o = o + 1) oacc[o] <= 0;
-                    if (commit_pending || commit) begin
+                    // смена банков только когда очередь записей пуста
+                    if ((commit_pending || commit) && q_n == 0 && !cfg_we) begin
                         commit_pending <= 1'b0;
-                        for (t = 0; t < NT; t = t + 1) begin
-                            dly[t] <= dly_sh[t];
-                            gn[t]  <= gn_sh[t];
-                        end
+                        act  <= ~act;
+                        ccnt <= 0;
+                        st   <= S_COPY;
                     end
+                end
+                S_COPY: begin
+                    ccnt <= ccnt + 1'b1;
+                    if (ccnt == NT) st <= S_WRITE;
                 end
                 S_WRITE: begin
                     we    <= 1'b1;
@@ -196,7 +252,7 @@ module delay_sum_engine #(
             // стадия D: вес
             d_v <= c_v;
             d_o <= c_ti[TL-1:NI_LOG2];
-            if (c_v) gprod <= y_sat * gn[c_ti];
+            if (c_v) gprod <= y_sat * tg_q;
             // стадия E: сумма по входам
             if (d_v) oacc[d_o] <= oacc[d_o] + (gprod >>> 16);
         end
