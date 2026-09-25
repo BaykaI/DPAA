@@ -103,7 +103,8 @@ def core_run(tmp_path_factory):
     cmds += hw.rx_beam_commands(0, az_deg=src_az)
     cmds += hw.rx_beam_commands(1, az_deg=40)
     cmds += [hw.encode_write(hw.REG_COMMIT, 3), hw.encode_write(hw.REG_CTRL, 3),
-             hw.encode_read(hw.REG_ID), hw.encode_read(hw.REG_PEAK + 0)]
+             hw.encode_read(hw.REG_ID), hw.encode_read(hw.REG_PEAK + 0),
+             hw.encode_read(hw.REG_PEAK + 16)]
     stream = b"".join(cmds)
 
     # плоская волна с направления src_az на 16 микрофонах, 17-й — тихий синус
@@ -127,11 +128,17 @@ def core_run(tmp_path_factory):
 
 def test_core_uart_readback(core_run):
     rsp = [int(v, 16) for v in (core_run["tmp"] / "rsp.txt").read_text().split()]
-    assert len(rsp) == 14
+    assert len(rsp) == 21
     addr, data = hw.decode_response(bytes(rsp[:7]))
     assert (addr, data) == (hw.REG_ID, hw.ID_VALUE)
-    addr, data = hw.decode_response(bytes(rsp[7:]))
-    assert addr == hw.REG_PEAK and data > 0
+    # пиковый уровень = максимум |отсчёта| микрофона с начала записи до момента чтения
+    mic = core_run["mic"]
+    for ch, frame in ((0, rsp[7:14]), (16, rsp[14:21])):
+        addr, data = hw.decode_response(bytes(frame))
+        assert addr == hw.REG_PEAK + ch
+        prefix_max = np.maximum.accumulate(np.abs(mic[ch]))
+        assert data in set(prefix_max.tolist())
+    assert data == pytest.approx(1000, abs=1)          # калибровочный канал: синус амплитудой 1000
 
 
 def test_core_tx_beam_phases(core_run):

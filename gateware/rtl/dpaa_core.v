@@ -122,28 +122,39 @@ module dpaa_core #(
     // ---------------- измерители уровня и счётчик кадров ----------------
     reg [23:0] frames;
     reg [23:0] peak [0:16];
-    // один измеритель обходит 17 каналов по очереди после каждого кадра микрофонов
-    reg  [4:0]  pk_i;
-    reg         pk_run;
-    wire [23:0] pk_s   = mic[pk_i*24 +: 24];
-    wire [23:0] pk_abs = pk_s[23] ? -pk_s : pk_s;
+    // Один измеритель обходит 17 каналов после каждого кадра микрофонов.
+    // Копия отсчётов сдвигается на 24 бита за такт (без мультиплексора по номеру),
+    // модуль и сравнение разнесены по двум тактам конвейера.
+    reg [17*24-1:0] pk_sh;
+    reg  [4:0]  pk_i, pk_i1;
+    reg         pk_run, pk_v1;
+    reg  [23:0] pk_a1;
+    wire [23:0] pk_s   = pk_sh[23:0];
     wire        pk_clr = bus_rd && bus_addr[14:5] == 10'h008 && bus_addr[4:0] < 17;
     integer pi;
     always @(posedge clk)
         if (rst) begin
             frames <= 0;
             pk_run <= 1'b0;
+            pk_v1  <= 1'b0;
             for (pi = 0; pi < 17; pi = pi + 1) peak[pi] <= 0;
         end else begin
             if (frame_start) frames <= frames + 1'b1;
+            // стадия 1: текущий канал -> модуль
+            pk_v1 <= pk_run && !mic_v;
+            pk_i1 <= pk_i;
+            pk_a1 <= pk_s[23] ? -pk_s : pk_s;
             if (mic_v) begin
-                pk_run <= 1'b1;
+                pk_sh  <= mic;
                 pk_i   <= 0;
+                pk_run <= 1'b1;
             end else if (pk_run) begin
-                if (pk_abs > peak[pk_i]) peak[pk_i] <= pk_abs;
-                pk_i <= pk_i + 1'b1;
+                pk_sh <= pk_sh >> 24;
+                pk_i  <= pk_i + 1'b1;
                 if (pk_i == 16) pk_run <= 1'b0;
             end
+            // стадия 2: сравнение с накопленным пиком
+            if (pk_v1 && pk_a1 > peak[pk_i1]) peak[pk_i1] <= pk_a1;
             if (pk_clr) peak[bus_addr[4:0]] <= 0;   // чтение сбрасывает пик
         end
 
