@@ -34,7 +34,7 @@ module delay_sum_engine #(
     input  wire [NI_LOG2+NO_LOG2-1:0]    cfg_idx,   // o*NI + i
     input  wire [23:0]                   cfg_data,
     input  wire                          commit,
-    output reg  [(1<<NO_LOG2)*24-1:0]    out_data,
+    output wire [(1<<NO_LOG2)*24-1:0]    out_data,
     output reg                           done
 );
     localparam NI = 1 << NI_LOG2;
@@ -94,7 +94,14 @@ module delay_sum_engine #(
     localparam S_IDLE = 3'd0, S_WRITE = 3'd1, S_RUN = 3'd2, S_DRAIN = 3'd3, S_COPY = 3'd4;
     reg [2:0]            st;
     reg [TL:0]           ccnt;
-    reg [(NI*18)-1:0]    in_lat;
+    reg signed [17:0]    in_lat [0:NI-1];   // массивы вместо шин с переменным индексом:
+    reg [23:0]           outr   [0:NO-1];   // x[i*W +: W] синтезируется в умножитель и сдвигатель
+    genvar go;
+    generate
+        for (go = 0; go < NO; go = go + 1) begin : g_out
+            assign out_data[go*24 +: 24] = outr[go];
+        end
+    endgenerate
     reg [DEPTH_LOG2-1:0] wptr;
     reg [NI_LOG2:0]      wcnt;
     reg [TL-1:0]         ti;
@@ -161,6 +168,7 @@ module delay_sum_engine #(
         end
 
     // стадия E: вход i = 0 начинает сумму, i = NI-1 — насыщение и запись выхода o
+    integer o;
     wire signed [27:0] oacc_nx = (d_first ? 28'sd0 : oacc) + (gprod >>> 16);
     wire signed [35:0] osh     = oacc_nx <<< OUT_SHL;
     wire [23:0]        osat    = (osh > 36'sd8388607)  ? 24'h7FFFFF :
@@ -176,12 +184,12 @@ module delay_sum_engine #(
             act <= 1'b0;
             r_v <= 1'b0; b_v <= 1'b0; c_v <= 1'b0; d_v <= 1'b0;
             b_ti <= 0;
-            out_data <= 0;
+            for (o = 0; o < NO; o = o + 1) outr[o] <= 0;
         end else begin
             if (commit) commit_pending <= 1'b1;
             case (st)
                 S_IDLE: if (tick) begin
-                    in_lat <= in_data;
+                    for (o = 0; o < NI; o = o + 1) in_lat[o] <= in_data[o*18 +: 18];
                     wptr   <= wptr + 1'b1;
                     wcnt   <= 0;
                     st     <= S_WRITE;
@@ -200,7 +208,7 @@ module delay_sum_engine #(
                 S_WRITE: begin
                     we    <= 1'b1;
                     waddr <= {wcnt[NI_LOG2-1:0], wptr};
-                    wdata <= in_lat[wcnt[NI_LOG2-1:0]*18 +: 18];
+                    wdata <= in_lat[wcnt[NI_LOG2-1:0]];
                     wcnt  <= wcnt + 1'b1;
                     if (wcnt == NI - 1) begin
                         st <= S_RUN;
@@ -255,7 +263,7 @@ module delay_sum_engine #(
             // стадия E: сумма по входам
             if (d_v) begin
                 oacc <= oacc_nx;
-                if (d_last) out_data[d_o*24 +: 24] <= osat;
+                if (d_last) outr[d_o] <= osat;
             end
         end
     end
