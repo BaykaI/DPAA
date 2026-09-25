@@ -11,9 +11,10 @@
 
 Подробная концепция, расчёты, сценарии и варианты железа: **[docs/concept.md](docs/concept.md)**.
 
-**Железо** (16 элементов, ПЛИС ECP5 на плате ULX3S, бюджет ≈ 820 $ из 1000 $):
+**Железо** (16 элементов, ПЛИС ECP5 на плате ULX3S, ≈ 840 $, с резервом ≈ 965 $ из 1000 $):
 [архитектура](docs/hardware/architecture.md) · [спецификация и бюджет](docs/hardware/bom.md) ·
 [схемы плат](docs/hardware/schematics.md) · [распиновка](docs/hardware/pinout.md) ·
+[элемент: динамик + микрофон, 3D-модель](docs/hardware/mechanics.md) ·
 [прошивка ПЛИС](gateware/README.md)
 
 ![Сканирование лучом](docs/img/07_tx_sweep_listeners.png)

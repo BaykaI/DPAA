@@ -23,6 +23,9 @@ FS = F_CLK / FRAME_CLKS       # 48828.125 Гц
 # --- Решётка ------------------------------------------------------------------
 N_ELEM = 16
 PITCH = 0.04
+# микрофон стоит в углу плитки держателя: +14.8 мм вправо и +14.8 мм вверх от центра
+# динамика (hardware/mech/dpaa_element.scad); вверх = ось z модели решётки
+MIC_OFFSET = np.array([0.0148, 0.0, 0.0148])
 
 # --- Ядро дробной задержки ----------------------------------------------------
 W = 18                        # разрядность отсчётов и коэффициентов (умножитель 18x18)
@@ -125,7 +128,13 @@ def biquad_bandpass(f_lo, f_hi, fs=FS):
 
 # --- Расчёт таблиц для ЦАФАР -----------------------------------------------------
 def element_positions(n=N_ELEM, pitch=PITCH):
+    """Центры динамиков."""
     return ula(n, pitch)
+
+
+def mic_positions(n=N_MICS, pitch=PITCH):
+    """Акустические отверстия микрофонов (сдвинуты от центров динамиков на MIC_OFFSET)."""
+    return ula(n, pitch) + MIC_OFFSET
 
 
 def beam_delays(az_deg=0.0, focus=None, positions=None, c=C_SOUND, fs=FS, margin=TAP_CENTER + 1):
@@ -206,7 +215,7 @@ def tx_beam_commands(beam, az_deg=None, focus=None, gains=None, n_out=N_ELEM,
 def rx_beam_commands(out, az_deg=None, focus=None, gains=None, n_in=N_MICS,
                      taper="uniform", sll_db=30.0, off=()):
     """Команды луча приёма out. Веса нормируются к единичному усилению в направлении луча."""
-    d = delay_reg(beam_delays(az_deg or 0.0, focus=focus))
+    d = delay_reg(beam_delays(az_deg or 0.0, focus=focus, positions=mic_positions(n_in)))
     if gains is None:
         w = element_weights(n_in, taper, sll_db, off=off)
         gains = w / np.sum(w)
