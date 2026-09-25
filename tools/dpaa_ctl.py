@@ -4,6 +4,9 @@
   python tools/dpaa_ctl.py --port /dev/ttyUSB0 id
   python tools/dpaa_ctl.py beam --az 30 --tone 3000          # луч на 30°, тон 3 кГц
   python tools/dpaa_ctl.py beam --az -20 --noise              # полосовой шум 1.5–4.3 кГц
+  python tools/dpaa_ctl.py --taper taylor --sll 35 beam --az 20   # амплитудное распределение
+  python tools/dpaa_ctl.py --off 1,3,5,7,9,11,13,15 beam --tone 4000  # прореживание -> дифр. лепесток
+  python tools/dpaa_ctl.py --weights 1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1 beam  # разностная ДН
   python tools/dpaa_ctl.py sweep --from -60 --to 60 --period 6
   python tools/dpaa_ctl.py two-beams --az1 -35 --az2 35       # два луча, два сигнала
   python tools/dpaa_ctl.py focus --x 0.3 --y 1.0              # фокус в точку
@@ -59,6 +62,34 @@ class Link:
         return d
 
 
+def dist(args):
+    """Параметры амплитудного распределения из общих ключей командной строки."""
+    kw = dict(taper=args.taper, sll_db=args.sll)
+    if args.off:
+        kw["off"] = [int(v) - 1 for v in args.off.split(",")]   # в командной строке элементы с 1
+    if args.weights:
+        w = [float(v) for v in args.weights.split(",")]
+        kw = dict(off=kw.get("off", ()))
+        kw["gains_raw"] = w
+    return kw
+
+
+def tx_beam(beam, args, **geo):
+    kw = dist(args)
+    if "gains_raw" in kw:
+        w = hw.element_weights(hw.N_ELEM, weights=kw["gains_raw"], off=kw["off"])
+        return hw.tx_beam_commands(beam, gains=0.5 * w, **geo)
+    return hw.tx_beam_commands(beam, **kw, **geo)
+
+
+def rx_beam(out, args, **geo):
+    kw = dist(args)
+    if "gains_raw" in kw:
+        w = hw.element_weights(hw.N_MICS, weights=kw["gains_raw"], off=kw["off"])
+        return hw.rx_beam_commands(out, gains=w / np.sum(np.abs(w)), **geo)
+    return hw.rx_beam_commands(out, **kw, **geo)
+
+
 def commit(tx=True, rx=False):
     return [hw.encode_write(hw.REG_COMMIT, (1 if tx else 0) | (2 if rx else 0))]
 
@@ -74,14 +105,14 @@ def source_cmds(beam, args, amp):
 
 def cmd_beam(link, args):
     link.send(source_cmds(0, args, args.amp) + hw.gen_commands(1, hw.MODE_OFF)
-              + hw.tx_beam_commands(0, az_deg=args.az)
+              + tx_beam(0, args, az_deg=args.az)
               + hw.tx_beam_commands(1, gains=np.zeros(hw.N_ELEM))
               + commit() + [hw.encode_write(hw.REG_CTRL, 3)])
 
 
 def cmd_focus(link, args):
     link.send(source_cmds(0, args, args.amp)
-              + hw.tx_beam_commands(0, focus=(args.x, args.y, 0.0))
+              + tx_beam(0, args, focus=(args.x, args.y, 0.0))
               + hw.tx_beam_commands(1, gains=np.zeros(hw.N_ELEM))
               + commit() + [hw.encode_write(hw.REG_CTRL, 3)])
 
@@ -90,8 +121,8 @@ def cmd_two(link, args):
     a = argparse.Namespace(tone=args.tone1, noise=False, chirp=False)
     b = argparse.Namespace(tone=args.tone2, noise=False, chirp=True)
     link.send(source_cmds(0, a, args.amp) + source_cmds(1, b, args.amp)
-              + hw.tx_beam_commands(0, az_deg=args.az1)
-              + hw.tx_beam_commands(1, az_deg=args.az2)
+              + tx_beam(0, args, az_deg=args.az1)
+              + tx_beam(1, args, az_deg=args.az2)
               + commit() + [hw.encode_write(hw.REG_CTRL, 3)])
 
 
@@ -106,7 +137,7 @@ def cmd_sweep(link, args):
             t = time.time() - t0
             ph = (t / args.period) % 1.0
             az = args.lo + (args.hi - args.lo) * (1 - abs(2 * ph - 1))
-            link.send(hw.tx_beam_commands(0, az_deg=az) + commit())
+            link.send(tx_beam(0, args, az_deg=az) + commit())
             time.sleep(1 / rate)
     except KeyboardInterrupt:
         pass
@@ -126,7 +157,7 @@ def cmd_elements(link, args):
 
 
 def cmd_listen(link, args):
-    link.send(hw.rx_beam_commands(0, az_deg=args.left) + hw.rx_beam_commands(1, az_deg=args.right)
+    link.send(rx_beam(0, args, az_deg=args.left) + rx_beam(1, args, az_deg=args.right)
               + commit(tx=False, rx=True) + [hw.encode_write(hw.REG_CTRL, 2)])
 
 
@@ -150,6 +181,11 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--port", help="последовательный порт ULX3S (например, /dev/ttyUSB0, COM5)")
     ap.add_argument("--amp", type=float, default=0.25, help=f"громкость 0..{MAX_AMP}")
+    ap.add_argument("--taper", default="uniform", choices=["uniform", "taylor", "chebyshev", "hann"],
+                    help="амплитудное распределение по элементам")
+    ap.add_argument("--sll", type=float, default=30.0, help="уровень боковых лепестков для taylor/chebyshev, дБ")
+    ap.add_argument("--weights", help="произвольные веса 16 элементов через запятую (могут быть < 0)")
+    ap.add_argument("--off", help="выключить элементы (номера с 1 через запятую)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("id")
     sub.add_parser("peaks")

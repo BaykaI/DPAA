@@ -166,10 +166,35 @@ def decode_response(frame):
     return ((frame[1] & 0x7F) << 8) | frame[2], (frame[3] << 16) | (frame[4] << 8) | frame[5]
 
 
-def tx_beam_commands(beam, az_deg=None, focus=None, gains=None, n_out=N_ELEM):
-    """Команды: задержки и усиления луча beam на передачу (без commit)."""
+def element_weights(n, taper="uniform", sll_db=30.0, weights=None, off=()):
+    """Амплитудное распределение по элементам (max = 1).
+
+    taper:   "uniform", "taylor", "chebyshev", "hann" — окно с уровнем боковых sll_db;
+    weights: произвольные веса (перекрывают taper), могут быть отрицательными;
+    off:     номера элементов (с 0), которые выключаются — «отказ» или прореживание.
+    """
+    from .patterns import taper as window
+
+    w = np.asarray(weights, dtype=float) if weights is not None else window(n, taper, sll_db)
+    if w.shape != (n,):
+        raise ValueError(f"need {n} weights, got {w.shape}")
+    w = w.copy()
+    w[list(off)] = 0.0
+    if not np.any(w):
+        raise ValueError("all elements are off")
+    return w / np.max(np.abs(w))
+
+
+def tx_beam_commands(beam, az_deg=None, focus=None, gains=None, n_out=N_ELEM,
+                     taper="uniform", sll_db=30.0, off=(), level=0.5):
+    """Команды: задержки и веса луча beam на передачу (без commit).
+
+    Веса = level · распределение (максимум level); gains — готовые веса (перекрывают всё).
+    """
     d = delay_reg(beam_delays(az_deg or 0.0, focus=focus))
-    g = gain_reg(np.full(n_out, 0.5) if gains is None else gains)
+    if gains is None:
+        gains = level * element_weights(n_out, taper, sll_db, off=off)
+    g = gain_reg(gains)
     cmds = []
     for o in range(n_out):
         idx = o * TX_BEAMS + beam
@@ -178,9 +203,14 @@ def tx_beam_commands(beam, az_deg=None, focus=None, gains=None, n_out=N_ELEM):
     return cmds
 
 
-def rx_beam_commands(out, az_deg=None, focus=None, gains=None, n_in=N_MICS):
+def rx_beam_commands(out, az_deg=None, focus=None, gains=None, n_in=N_MICS,
+                     taper="uniform", sll_db=30.0, off=()):
+    """Команды луча приёма out. Веса нормируются к единичному усилению в направлении луча."""
     d = delay_reg(beam_delays(az_deg or 0.0, focus=focus))
-    g = gain_reg(np.full(n_in, 1.0 / n_in) if gains is None else gains)
+    if gains is None:
+        w = element_weights(n_in, taper, sll_db, off=off)
+        gains = w / np.sum(w)
+    g = gain_reg(gains)
     cmds = []
     for i in range(n_in):
         idx = out * n_in + i
