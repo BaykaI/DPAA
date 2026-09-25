@@ -110,11 +110,11 @@ module delay_sum_engine #(
     reg              r_v, r_k0, r_k7;  reg [TL-1:0] r_ti;   // данные памяти готовы
     reg              b_v, b_k0, b_k7;  reg [TL-1:0] b_ti;
     reg              c_v;              reg [TL-1:0] c_ti;
-    reg              d_v;              reg [NO_LOG2-1:0] d_o;
+    reg              d_v, d_first, d_last;  reg [NO_LOG2-1:0] d_o;
     reg signed [35:0] prod;
     reg signed [38:0] acc;
     reg signed [35:0] gprod;
-    reg signed [27:0] oacc [0:NO-1];
+    reg signed [27:0] oacc;               // сумма по входам для текущего выхода
 
     wire signed [22:0] y_sh  = acc >>> 16;
     wire signed [17:0] y_sat = (y_sh > 23'sd131071)  ?  18'sd131071 :
@@ -160,8 +160,11 @@ module delay_sum_engine #(
             q_n <= q_n + (cfg_we ? 3'd1 : 3'd0) - (q_pop ? 3'd1 : 3'd0);
         end
 
-    integer o;
-    reg signed [35:0] osh;
+    // стадия E: вход i = 0 начинает сумму, i = NI-1 — насыщение и запись выхода o
+    wire signed [27:0] oacc_nx = (d_first ? 28'sd0 : oacc) + (gprod >>> 16);
+    wire signed [35:0] osh     = oacc_nx <<< OUT_SHL;
+    wire [23:0]        osat    = (osh > 36'sd8388607)  ? 24'h7FFFFF :
+                                 (osh < -36'sd8388608) ? 24'h800000 : osh[23:0];
     always @(posedge clk) begin
         we   <= 1'b0;
         done <= 1'b0;
@@ -182,7 +185,6 @@ module delay_sum_engine #(
                     wptr   <= wptr + 1'b1;
                     wcnt   <= 0;
                     st     <= S_WRITE;
-                    for (o = 0; o < NO; o = o + 1) oacc[o] <= 0;
                     // смена банков только когда очередь записей пуста
                     if ((commit_pending || commit) && q_n == 0 && !cfg_we) begin
                         commit_pending <= 1'b0;
@@ -225,11 +227,6 @@ module delay_sum_engine #(
                 S_DRAIN: begin
                     drain <= drain + 1'b1;
                     if (drain == 9) begin
-                        for (o = 0; o < NO; o = o + 1) begin
-                            osh = oacc[o] <<< OUT_SHL;
-                            out_data[o*24 +: 24] <= (osh > 36'sd8388607)  ? 24'h7FFFFF :
-                                                    (osh < -36'sd8388608) ? 24'h800000 : osh[23:0];
-                        end
                         done <= 1'b1;
                         st   <= S_IDLE;
                     end
@@ -250,11 +247,16 @@ module delay_sum_engine #(
                 else      acc <= acc + prod;
             end
             // стадия D: вес
-            d_v <= c_v;
-            d_o <= c_ti[TL-1:NI_LOG2];
+            d_v     <= c_v;
+            d_o     <= c_ti[TL-1:NI_LOG2];
+            d_first <= (c_ti[NI_LOG2-1:0] == 0);
+            d_last  <= (c_ti[NI_LOG2-1:0] == NI - 1);
             if (c_v) gprod <= y_sat * tg_q;
             // стадия E: сумма по входам
-            if (d_v) oacc[d_o] <= oacc[d_o] + (gprod >>> 16);
+            if (d_v) begin
+                oacc <= oacc_nx;
+                if (d_last) out_data[d_o*24 +: 24] <= osat;
+            end
         end
     end
 endmodule

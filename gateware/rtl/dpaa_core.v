@@ -122,20 +122,29 @@ module dpaa_core #(
     // ---------------- измерители уровня и счётчик кадров ----------------
     reg [23:0] frames;
     reg [23:0] peak [0:16];
+    // один измеритель обходит 17 каналов по очереди после каждого кадра микрофонов
+    reg  [4:0]  pk_i;
+    reg         pk_run;
+    wire [23:0] pk_s   = mic[pk_i*24 +: 24];
+    wire [23:0] pk_abs = pk_s[23] ? -pk_s : pk_s;
+    wire        pk_clr = bus_rd && bus_addr[14:5] == 10'h008 && bus_addr[4:0] < 17;
     integer pi;
     always @(posedge clk)
         if (rst) begin
             frames <= 0;
+            pk_run <= 1'b0;
             for (pi = 0; pi < 17; pi = pi + 1) peak[pi] <= 0;
         end else begin
             if (frame_start) frames <= frames + 1'b1;
-            for (pi = 0; pi < 17; pi = pi + 1)
-                if (bus_rd && bus_addr == 15'h0100 + pi)
-                    peak[pi] <= 0;
-                else if (mic_v) begin
-                    if (mic[pi*24+23] ? (-mic[pi*24 +: 24]) > peak[pi] : mic[pi*24 +: 24] > peak[pi])
-                        peak[pi] <= mic[pi*24+23] ? -mic[pi*24 +: 24] : mic[pi*24 +: 24];
-                end
+            if (mic_v) begin
+                pk_run <= 1'b1;
+                pk_i   <= 0;
+            end else if (pk_run) begin
+                if (pk_abs > peak[pk_i]) peak[pk_i] <= pk_abs;
+                pk_i <= pk_i + 1'b1;
+                if (pk_i == 16) pk_run <= 1'b0;
+            end
+            if (pk_clr) peak[bus_addr[4:0]] <= 0;   // чтение сбрасывает пик
         end
 
     // ---------------- ответы на чтение ----------------
