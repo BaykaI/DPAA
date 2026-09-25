@@ -126,9 +126,9 @@ module dpaa_core #(
     // Копия отсчётов сдвигается на 24 бита за такт (без мультиплексора по номеру),
     // модуль и сравнение разнесены по двум тактам конвейера.
     reg [17*24-1:0] pk_sh;
-    reg  [4:0]  pk_i, pk_i1;
-    reg         pk_run, pk_v1;
-    reg  [23:0] pk_a1;
+    reg  [4:0]  pk_i, pk_i1, pk_i2;
+    reg         pk_run, pk_v1, pk_v2;
+    reg  [23:0] pk_a1, pk_a2, pk_old;
     wire [23:0] pk_s   = pk_sh[23:0];
     wire        pk_clr = bus_rd && bus_addr[14:5] == 10'h008 && bus_addr[4:0] < 17;
     integer pi;
@@ -137,6 +137,7 @@ module dpaa_core #(
             frames <= 0;
             pk_run <= 1'b0;
             pk_v1  <= 1'b0;
+            pk_v2  <= 1'b0;
             for (pi = 0; pi < 17; pi = pi + 1) peak[pi] <= 0;
         end else begin
             if (frame_start) frames <= frames + 1'b1;
@@ -153,9 +154,14 @@ module dpaa_core #(
                 pk_i  <= pk_i + 1'b1;
                 if (pk_i == 16) pk_run <= 1'b0;
             end
-            // стадия 2: сравнение с накопленным пиком
-            if (pk_v1 && pk_a1 > peak[pk_i1]) peak[pk_i1] <= pk_a1;
-            if (pk_clr) peak[bus_addr[4:0]] <= 0;   // чтение сбрасывает пик
+            // стадия 2: чтение накопленного пика
+            pk_v2  <= pk_v1;
+            pk_i2  <= pk_i1;
+            pk_a2  <= pk_a1;
+            pk_old <= peak[pk_i1];
+            // стадия 3: сравнение и запись (каналы обходятся по очереди, конфликтов нет)
+            if (pk_v2 && pk_a2 > pk_old) peak[pk_i2] <= pk_a2;
+            if (pk_clr) peak[bus_addr[4:0]] <= 0;   // чтение сбрасывает пик (приоритет)
         end
 
     // ---------------- ответы на чтение ----------------

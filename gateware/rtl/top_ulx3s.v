@@ -16,8 +16,8 @@ module top_ulx3s (
     output wire        wifi_rxd,     // от ПЛИС к ESP32
     output wire        wifi_en,
     output wire        wifi_gpio0,
-    inout  wire [27:0] gp,
-    inout  wire [27:0] gn
+    output wire [18:0] gp,           // gp[19..27] и gn[17..27] не используются —
+    input  wire [16:0] gn            // остаются входами с высоким импедансом
 );
     wire clk, locked;
     pll_25_50 u_pll (.clkin(clk_25mhz), .clkout0(clk), .locked(locked));
@@ -41,13 +41,11 @@ module top_ulx3s (
         .clk(clk), .rst(rst),
         .uart_rx_a(ftdi_txd), .uart_rx_b(wifi_txd), .uart_tx(uart_tx),
         .btn_test(btn[1]),   // FIRE1: проверочный тон 3 кГц по нормали, пока нажата
-        .bclk(bclk), .lrclk(lrclk), .txd(txd), .rxd(gn[16:0]), .mon_sd(mon_sd),
+        .bclk(bclk), .lrclk(lrclk), .txd(txd), .rxd(gn), .mon_sd(mon_sd),
         .led(led));
 
     assign gp[0]     = bclk;
     assign gp[1]     = lrclk;
     assign gp[17:2]  = txd;
     assign gp[18]    = mon_sd;
-    assign gp[27:19] = 9'bz;
-    assign gn        = 28'bz;
 endmodule
