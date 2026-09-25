@@ -34,6 +34,11 @@
 
 ## Структурная схема
 
+![Структурная схема установки](../img/structure.svg)
+
+Исходник — `scripts/draw_block_diagram.py` (PNG для слайдов: `docs/img/structure.png`).
+Ниже та же схема упрощённо, в виде Mermaid-диаграммы.
+
 ```mermaid
 flowchart LR
     ESP["ESP32-S3 DevKit<br/>Wi‑Fi, веб-пульт,<br/>расчёт задержек"]

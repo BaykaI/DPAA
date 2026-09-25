@@ -17,6 +17,8 @@
 [элемент: динамик + микрофон, 3D-модель](docs/hardware/mechanics.md) ·
 [прошивка ПЛИС](gateware/README.md)
 
+![Структурная схема установки](docs/img/structure.svg)
+
 ![Сканирование лучом](docs/img/07_tx_sweep_listeners.png)
 
 ## Что уже есть
