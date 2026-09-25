@@ -9,6 +9,8 @@
 #
 # BOARD=i9     — Colorlight i9 v7.2 (LFE5U-45F) + плата расширения (основной вариант)
 #                ограничения: colorlight_i9_dpaa.lpf (заменить все SITE "???")
+# BOARD=i5     — Colorlight i5 (LFE5U-25F), та же плата расширения; colorlight_i5_dpaa.lpf
+#                (разводка модулей i5 и i9 может отличаться — выводы заполнять по своей ревизии)
 # BOARD=ulx3s  — ULX3S (LFE5U-85F); ограничения: официальный ulx3s_v20.lpf платы
 #                + настройки буферов ulx3s_dpaa_io.lpf
 BOARD ?= i9
@@ -23,8 +25,13 @@ else ifeq ($(BOARD),i9)
   TOP     := top_colorlight_i9
   LPF_SRC := colorlight_i9_dpaa.lpf
   PROG    := openFPGALoader -c cmsisdap
+else ifeq ($(BOARD),i5)
+  DEVICE  ?= 25k
+  TOP     := top_colorlight_i9
+  LPF_SRC := colorlight_i5_dpaa.lpf
+  PROG    := openFPGALoader -c cmsisdap
 else
-  $(error BOARD must be i9 or ulx3s)
+  $(error BOARD must be i9, i5 or ulx3s)
 endif
 
 PACKAGE ?= CABGA381
