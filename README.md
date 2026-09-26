@@ -14,7 +14,7 @@
 **Железо** (16 элементов, ПЛИС ECP5 на модуле Colorlight i9, ≈ 750 $, с резервом ≈ 860 $ из 1000 $):
 [архитектура](docs/hardware/architecture.md) · [спецификация и бюджет](docs/hardware/bom.md) ·
 [схемы плат](docs/hardware/schematics.md) · [распиновка](docs/hardware/pinout.md) ·
-[элемент: динамик + микрофон, 3D-модель](docs/hardware/mechanics.md) ·
+[схема соединений](docs/hardware/wiring.md) · [элемент: динамик + микрофон, 3D-модель](docs/hardware/mechanics.md) ·
 [прошивка ПЛИС](gateware/README.md)
 
 ![Структурная схема установки](docs/img/structure.svg)

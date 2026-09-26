@@ -37,6 +37,7 @@
 ![Структурная схема установки](../img/structure.svg)
 
 Исходник — `scripts/draw_block_diagram.py` (PNG для слайдов: `docs/img/structure.png`).
+Соединения плат, разъёмы и кабели — [схема соединений](wiring.md).
 Ниже та же схема упрощённо, в виде Mermaid-диаграммы.
 
 ```mermaid

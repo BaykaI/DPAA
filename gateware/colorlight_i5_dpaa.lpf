@@ -2,8 +2,9 @@
 # SITE "???" заменить на выводы ПЛИС по распиновке платы расширения (PMOD P1..P6)
 # и модуля i9 (генератор 25 МГц, светодиод). Пока остаётся хоть один "???",
 # make BOARD=i9 откажется собирать битстрим — это защита от неверной распиновки.
-# Рекомендуемая раскладка по PMOD: P1 — BCLK, LRCLK, MON_SD, UART ESP32;
-# P2, P3 — TXD0..15; P4, P5 — MIC0..15; P6 — CAL, USB-UART, кнопка.
+# Раскладка по PMOD (контакты 1–4, 7–10) — docs/hardware/wiring.md:
+# P1 — BCLK, LRCLK, MON_SD, BTN_TEST, ESP_TX, ESP_RX, USB_TX, USB_RX;
+# P2, P3 — TXD0..15; P4, P5 — MIC0..15 (rxd[0..15]); P6 — CAL (rxd[16]) + резерв.
 
 LOCATE COMP "clk25" SITE "???";      # генератор 25 МГц на модуле i9
 IOBUF PORT "clk25" IO_TYPE=LVCMOS33;
