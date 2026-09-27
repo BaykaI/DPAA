@@ -1,0 +1,43 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Dpaa.App.App"
+             RequestedThemeVariant="Light">
+  <Application.Styles>
+    <FluentTheme />
+    <Style Selector="TextBlock.h">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Margin" Value="0,6,0,2" />
+    </Style>
+    <Style Selector="TextBlock.hint">
+      <Setter Property="Foreground" Value="#5b6270" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="BorderBrush" Value="#d5dbe3" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="10" />
+    </Style>
+    <Style Selector="Button.stop">
+      <Setter Property="Background" Value="#c0392b" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Button.stop:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#a93226" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.go">
+      <Setter Property="Background" Value="#2e8b57" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Button.go:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#24744a" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+  </Application.Styles>
+</Application>

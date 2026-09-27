@@ -1,0 +1,199 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:app="using:Dpaa.App"
+        xmlns:c="using:Dpaa.App.Controls"
+        x:Class="Dpaa.App.MainWindow"
+        x:DataType="app:MainViewModel"
+        Title="Акустическая ЦАФАР — пульт управления"
+        Width="1360" Height="860" MinWidth="1100" MinHeight="700"
+        Background="#eef1f5">
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- верхняя панель: подключение и пуск/стоп -->
+    <Border Grid.Row="0" Background="White" BorderBrush="#d5dbe3" BorderThickness="0,0,0,1" Padding="12,8">
+      <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="{Binding RunState}" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"
+                     Foreground="#c0392b" />
+          <Button Classes="go" Content="▶ ПУСК" Command="{Binding StartCommand}" Padding="18,8"
+                  ToolTip.Tip="Включить выбранный сценарий" />
+          <Button Classes="stop" Content="■ СТОП (Esc)" Command="{Binding StopCommand}" Padding="18,8"
+                  ToolTip.Tip="Тишина: запретить излучение и приём" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="Порт:" VerticalAlignment="Center" />
+          <ComboBox ItemsSource="{Binding Ports}" SelectedItem="{Binding SelectedPort}" Width="220"
+                    IsEnabled="{Binding !IsConnected}" />
+          <Button Content="↻" Command="{Binding RefreshPortsCommand}" IsEnabled="{Binding !IsConnected}"
+                  ToolTip.Tip="Обновить список портов" />
+          <Button Content="{Binding ConnectText}" Command="{Binding ConnectCommand}" MinWidth="110" />
+          <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="#5b6270"
+                     TextTrimming="CharacterEllipsis" MaxWidth="560" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="410,*" Margin="10">
+
+      <!-- левая колонка: сценарии и параметры -->
+      <ScrollViewer Grid.Column="0" Margin="0,0,10,0">
+        <StackPanel Spacing="10">
+          <Border Classes="card" Padding="4">
+            <TabControl SelectedIndex="{Binding ModeIndex}" Padding="8,4">
+              <TabItem Header="Луч" FontSize="13" Padding="7,4" MinHeight="34">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="hint" Text="Один луч в заданном направлении. Двигайте ползунок во время излучения — луч поворачивается «вживую»." />
+                  <TextBlock Classes="h" Text="{Binding Az, StringFormat='Направление: {0:+0.#;−0.#;0}°'}" />
+                  <Slider Minimum="-80" Maximum="80" Value="{Binding Az}" TickFrequency="10" />
+                </StackPanel>
+              </TabItem>
+              <TabItem Header="Скан" FontSize="13" Padding="7,4" MinHeight="34">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="hint" Text="Луч качается «маятником» — звук обходит зал. Как обзор РЛС." />
+                  <TextBlock Classes="h" Text="{Binding SweepFrom, StringFormat='От: {0:0}°'}" />
+                  <Slider Minimum="-80" Maximum="0" Value="{Binding SweepFrom}" />
+                  <TextBlock Classes="h" Text="{Binding SweepTo, StringFormat='До: {0:0}°'}" />
+                  <Slider Minimum="0" Maximum="80" Value="{Binding SweepTo}" />
+                  <TextBlock Classes="h" Text="{Binding SweepPeriod, StringFormat='Период: {0:0.#} с'}" />
+                  <Slider Minimum="1" Maximum="20" Value="{Binding SweepPeriod}" />
+                  <TextBlock Classes="hint" Text="{Binding SweepNow}" />
+                </StackPanel>
+              </TabItem>
+              <TabItem Header="Фокус" FontSize="13" Padding="7,4" MinHeight="34">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="hint" Text="Фокусировка в точку ближней зоны — «акустический прожектор». Точку удобно задавать щелчком по плану зала." />
+                  <TextBlock Classes="h" Text="{Binding FocusX, StringFormat='Вбок (x): {0:0.00} м'}" />
+                  <Slider Minimum="-1.5" Maximum="1.5" Value="{Binding FocusX}" />
+                  <TextBlock Classes="h" Text="{Binding FocusY, StringFormat='Вперёд (y): {0:0.00} м'}" />
+                  <Slider Minimum="0.2" Maximum="3" Value="{Binding FocusY}" />
+                </StackPanel>
+              </TabItem>
+              <TabItem Header="2 луча" FontSize="13" Padding="7,4" MinHeight="34">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="hint" Text="Два независимых луча с разными сигналами одновременно — каждый слушатель слышит своё." />
+                  <TextBlock Classes="h" Foreground="#1f63b0" Text="{Binding Az1, StringFormat='Луч 1: {0:+0.#;−0.#;0}°'}" />
+                  <Slider Minimum="-80" Maximum="80" Value="{Binding Az1}" />
+                  <TextBlock Text="{Binding Tone1, StringFormat='тон луча 1: {0:0} Гц'}" />
+                  <Slider Minimum="500" Maximum="5000" Value="{Binding Tone1}" />
+                  <TextBlock Classes="h" Foreground="#c0392b" Text="{Binding Az2, StringFormat='Луч 2: {0:+0.#;−0.#;0}°'}" />
+                  <Slider Minimum="-80" Maximum="80" Value="{Binding Az2}" />
+                  <ComboBox ItemsSource="{Binding Sources}" SelectedIndex="{Binding Source2Index}" HorizontalAlignment="Stretch" />
+                  <TextBlock Text="{Binding Tone2, StringFormat='тон луча 2: {0:0} Гц'}" IsVisible="{Binding IsTone2}" />
+                  <Slider Minimum="500" Maximum="5000" Value="{Binding Tone2}" IsVisible="{Binding IsTone2}" />
+                </StackPanel>
+              </TabItem>
+              <TabItem Header="Элементы" FontSize="13" Padding="7,4" MinHeight="34">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="hint" Text="Проверка: элементы звучат по очереди, слева направо. Пропавший звук — ищите обрыв провода." />
+                  <TextBlock Classes="h" Text="{Binding ElemTone, StringFormat='Тон: {0:0} Гц'}" />
+                  <Slider Minimum="500" Maximum="5000" Value="{Binding ElemTone}" />
+                  <TextBlock Classes="h" Text="{Binding Dwell, StringFormat='На элемент: {0:0.0} с'}" />
+                  <Slider Minimum="0.2" Maximum="3" Value="{Binding Dwell}" />
+                  <TextBlock Classes="h" Foreground="#2e8b57" Text="{Binding ElementNow}" />
+                </StackPanel>
+              </TabItem>
+              <TabItem Header="Приём" FontSize="13" Padding="7,4" MinHeight="34">
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="hint" Text="Два луча приёма выводятся в наушники: левое ухо слушает одно направление, правое — другое. Говорите с разных сторон от решётки." />
+                  <TextBlock Classes="h" Foreground="#1f63b0" Text="{Binding LeftAz, StringFormat='Левое ухо: {0:+0.#;−0.#;0}°'}" />
+                  <Slider Minimum="-80" Maximum="80" Value="{Binding LeftAz}" />
+                  <TextBlock Classes="h" Foreground="#c0392b" Text="{Binding RightAz, StringFormat='Правое ухо: {0:+0.#;−0.#;0}°'}" />
+                  <Slider Minimum="-80" Maximum="80" Value="{Binding RightAz}" />
+                </StackPanel>
+              </TabItem>
+            </TabControl>
+          </Border>
+
+          <Border Classes="card" IsVisible="{Binding HasConfigError}" BorderBrush="#c0392b">
+            <TextBlock Text="{Binding ConfigError}" Foreground="#c0392b" TextWrapping="Wrap" />
+          </Border>
+
+          <Border Classes="card" IsVisible="{Binding !IsReceive}">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="h" Text="Сигнал" Margin="0" />
+              <StackPanel Spacing="4" IsVisible="{Binding ShowSource}">
+              <ComboBox ItemsSource="{Binding Sources}" SelectedIndex="{Binding SourceIndex}" HorizontalAlignment="Stretch" />
+              <TextBlock Text="{Binding ToneHz, StringFormat='Частота тона: {0:0} Гц'}" IsVisible="{Binding IsTone}" />
+              <Slider Minimum="500" Maximum="6000" Value="{Binding ToneHz}" IsVisible="{Binding IsTone}" />
+              </StackPanel>
+              <TextBlock IsVisible="{Binding ShowToneHint}" Classes="hint"
+                         Text="Выше 4.3 кГц появляются дифракционные лепестки (шаг решётки 40 мм) — это тоже можно показать." />
+              <TextBlock Text="{Binding Amp, StringFormat='Громкость: {0:0.00} (не больше 0.5)'}" />
+              <Slider Minimum="0" Maximum="{Binding MaxAmp}" Value="{Binding Amp}" />
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" IsVisible="{Binding ShowDistribution}">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="h" Text="Амплитудное распределение" Margin="0" />
+              <ComboBox ItemsSource="{Binding Tapers}" SelectedIndex="{Binding TaperIndex}" HorizontalAlignment="Stretch"
+                        IsEnabled="{Binding !UseCustom}" />
+              <TextBlock Text="{Binding Sll, StringFormat='Уровень боковых лепестков: −{0:0} дБ'}" IsVisible="{Binding HasSll}" />
+              <Slider Minimum="20" Maximum="50" Value="{Binding Sll}" IsVisible="{Binding HasSll}" IsEnabled="{Binding !UseCustom}" />
+              <TextBlock Text="Элементы (нажатый — включён):" Margin="0,4,0,0" />
+              <ItemsControl ItemsSource="{Binding Elements}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="8" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="app:ElementToggle">
+                    <ToggleButton Content="{Binding Number}" IsChecked="{Binding IsOn}" Margin="1"
+                                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="0,4" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Content="Все включить" Command="{Binding AllOnCommand}" />
+                <Button Content="Через один" Command="{Binding EveryOtherCommand}"
+                        ToolTip.Tip="Прореживание: шаг 80 мм — появится дифракционный лепесток" />
+              </StackPanel>
+              <CheckBox Content="Свои веса (16 чисел, можно отрицательные)" IsChecked="{Binding UseCustom}" Margin="0,4,0,0" />
+              <TextBox Text="{Binding CustomWeights}" IsEnabled="{Binding UseCustom}" FontFamily="monospace" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- правая часть: план зала, диаграмма, веса, уровни, журнал -->
+      <Grid Grid.Column="1" RowDefinitions="3*,2*,Auto" ColumnDefinitions="*,*">
+        <Border Grid.Row="0" Grid.Column="0" Classes="card" Padding="0" Margin="0,0,5,5" ClipToBounds="True">
+          <c:ArrayMap x:Name="Map" Lobe0="{Binding Pattern0}" Lobe1="{Binding Pattern1}" FocusPoint="{Binding FocusPoint}"
+                      ElementsOn="{Binding ElementsOn}" ActiveElement="{Binding ActiveElement}"
+                      Hint="{Binding MapHint}" Receive="{Binding IsReceive}" Cursor="Hand" />
+        </Border>
+        <Border Grid.Row="0" Grid.Column="1" Classes="card" Padding="0" Margin="5,0,0,5" ClipToBounds="True">
+          <c:PatternPlot Data0="{Binding Pattern0}" Data1="{Binding Pattern1}" Caption="{Binding PatternCaption}" />
+        </Border>
+        <Border Grid.Row="1" Grid.Column="0" Classes="card" Padding="0" Margin="0,5,5,5" ClipToBounds="True">
+          <c:BarChart Values="{Binding Weights}" Minimum="-1" Maximum="1" Highlight="{Binding ActiveElement}"
+                      Caption="Веса элементов (отправленные в ПЛИС)" />
+        </Border>
+        <Border Grid.Row="1" Grid.Column="1" Classes="card" Padding="0" Margin="5,5,0,5" ClipToBounds="True">
+          <c:BarChart Values="{Binding Peaks}" Minimum="-90" Maximum="0" Baseline="-90" LastLabel="зонд"
+                      Caption="Уровни микрофонов, дБПШ (пик за 0.3 с)" />
+        </Border>
+        <Border Grid.Row="2" Grid.ColumnSpan="2" Classes="card" Padding="8,4" Margin="0,5,0,0" Height="96">
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding LogLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                  <TextBlock Text="{Binding}" FontFamily="monospace" FontSize="12" Foreground="#3a3f47" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Border>
+      </Grid>
+    </Grid>
+
+    <Border Grid.Row="2" Background="White" BorderBrush="#d5dbe3" BorderThickness="0,1,0,0" Padding="12,4">
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Right" Text="{Binding DeviceInfo}" Foreground="#5b6270" />
+        <TextBlock Foreground="#5b6270"
+                   Text="16 элементов · шаг 40 мм · 48 828 Гц · Esc — тишина · расчёт диаграммы — по тем же кадрам, что уходят в ПЛИС" />
+      </DockPanel>
+    </Border>
+  </Grid>
+</Window>

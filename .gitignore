@@ -4,3 +4,7 @@ __pycache__/
 out/
 .venv/
 gateware/build/
+software/**/bin/
+software/**/obj/
+software/**/.vs/
+*.user
