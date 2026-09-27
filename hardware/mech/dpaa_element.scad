@@ -1,7 +1,7 @@
 // Держатель элемента акустической ЦАФАР под ГОТОВЫЕ модули (минимум своего монтажа).
 //
 // «Плитка» 39.6 x 59.6 мм (шаг решётки 40 мм по горизонтали, 60 мм по вертикали):
-//   внизу  — динамик 28…36 мм в закрытом объёме (нет излучения назад);
+//   внизу  — динамик (круглый 28…36 мм или овальный 15 x 24 мм) в закрытом объёме;
 //   вверху — круглое гнездо под готовый модуль микрофона ICS-43434 (Ø ≈ 14 мм,
 //            проверить штангенциркулем и поправить mic_d): модуль вставляется сзади
 //            до упорного бортика, выводы смотрят назад, к проводам.
@@ -21,7 +21,8 @@ part    = "exploded";
 //   "rd28" — круглый 28 мм, 8 Ом 2 Вт, внутренний магнит (основной, ≈ 0.5–1 $);
 //   "rd36" — круглый 36 мм майларовый, 8 Ом 1 Вт (самый дешёвый, 1 Вт — см. mechanics.md);
 //   "rd32" — круглый 32 мм (Dayton Audio CE32A-8 и аналоги);
-//   "sq32" — квадратный 32 мм (Visaton BF 32 S).
+//   "sq32" — квадратный 32 мм (Visaton BF 32 S);
+//   "ov1524" — овальный 15 x 24 x 3.5 мм, 8 Ом 0.8 Вт (длинной стороной вертикально).
 speaker = "rd28";
 
 $fn = 72;
@@ -36,30 +37,32 @@ sp_y    = -Ht/2 + W/2;        // центр динамика (-10)
 mic_y   =  Ht/2 - (Ht - W)/2; // центр микрофона (+19.8)
 
 // ---------- динамик ----------
-//               [диаметр/сторона рамы, монтажная глубина, толщина обода рамы, Ø магнита]
-spk_table = [["rd28", [28.0,  6.0, 1.5, 16]],
-             ["rd36", [36.0,  5.0, 1.5, 16]],
-             ["rd32", [32.0, 14.5, 1.2, 22]],
-             ["sq32", [32.0, 11.0, 1.2, 22]]];
+//   [ширина (Ø), высота (= ширине у круглых), монтажная глубина, толщина обода,
+//    Ø магнита, глубина объёма за динамиком L_cav]
+spk_table = [["rd28",   [28.0, 28.0,  6.0, 1.5, 16, 16]],
+             ["rd36",   [36.0, 36.0,  5.0, 1.5, 16, 16]],
+             ["rd32",   [32.0, 32.0, 14.5, 1.2, 22, 16]],
+             ["sq32",   [32.0, 32.0, 11.0, 1.2, 22, 16]],
+             ["ov1524", [15.0, 24.0,  3.5, 2.5, 10, 10]]];  // выводы 50 мм — объём мельче
 spk      = spk_table[search([speaker], spk_table)[0]][1];
-square   = speaker == "sq32";
-spk_d    = spk[0];            // диаметр (или сторона) рамы
-spk_depth= spk[1];            // от лицевой плоскости рамы до торца магнита
-flange_t = spk[2];            // толщина обода, на который давят упоры крышки
-magnet_d = spk[3];
-spk_rd   = spk_d + 0.4;       // гнездо под раму с зазором
-spk_sq   = spk_d + 0.4;
+shape    = speaker[0] == "s" ? "square" : speaker[0] == "o" ? "oval" : "round";
+spk_w    = spk[0];
+spk_h    = spk[1];
+spk_depth= spk[2];            // от лицевой плоскости рамы до торца магнита
+flange_t = spk[3];            // толщина обода, на который давят упоры крышки
+magnet_d = spk[4];
+L_cav    = spk[5];
+spk_clr  = 0.4;               // зазор гнезда под раму
 
 // ---------- лицевая часть ----------
 lip        = 1.5;             // толщина перед рамой динамика
 flange_pkt = 1.8;             // гнездо под раму динамика
 t_front    = lip + flange_pkt;
-cone_d     = spk_d - 4.5;     // раскрыв перед диффузором (обод рамы лежит на бортике)
+horn_in    = shape == "oval" ? 3.0 : 4.5;   // раскрыв меньше рамы: рама лежит на бортике
 chamfer    = 1.0;
 
 // ---------- объём за динамиком ----------
-cav    = max(32.8, spk_rd + 0.4);  // для 36 мм стенки корпуса ≈ 1.4 мм
-L_cav  = 16;
+cav    = max(32.8, max(spk_w, spk_h) + 2*spk_clr + 0.4);  // для 36 мм стенки ≈ 1.4 мм
 depth  = t_front + L_cav;
 
 // ---------- модуль микрофона ----------
@@ -73,14 +76,33 @@ back_t  = 3;
 plug_h  = 2;
 clr     = 0.25;
 post    = 2.4;
-// упоры давят на обод рамы: у квадратной — в углы, у круглой — на радиусе spk_d/2 - 1.3
-post_xy = square ? 14.6 : (spk_d/2 - 1.3) / sqrt(2);
+// упоры давят на обод рамы: у квадратной — в углы, у круглой — по диагоналям на радиусе
+// spk_w/2 - 1.3, у овальной — ближе к концам (в середине магнит, внизу провода)
+pr      = (spk_w/2 - 1.3) / sqrt(2);
+oy      = spk_h/2 - 2.5;
+ox      = sqrt(pow(spk_w/2, 2) - pow(oy - (spk_h - spk_w)/2, 2)) - 1.0;
+pxy     = shape == "square" ? [14.6, 14.6] : shape == "oval" ? [ox, oy] : [pr, pr];
+posts   = [for (sx = [-1, 1], sy = [-1, 1]) [sx*pxy[0], sy*pxy[1]]];
 m3_xy   = 12;
 m3_d    = 4.2;
 cable_d = 5;
 cable_y = -10;                // относительно центра динамика
 
 // =====================================================================
+// контур рамы динамика (2D), увеличенный на grow с каждой стороны
+module spk_outline(grow = 0) {
+    w = spk_w + 2*grow;
+    h = spk_h + 2*grow;
+    if (shape == "square") square([w, h], center = true);
+    else hull() for (sy = [-1, 1]) translate([0, sy*(h - w)/2]) circle(d = w);
+}
+
+// раскрыв: у квадратной рамы — круглый (диффузор круглый)
+module horn_outline(grow = 0) {
+    if (shape == "square") circle(d = spk_w + 2*grow);
+    else spk_outline(grow);
+}
+
 module holder() {
     difference() {
         union() {
@@ -93,13 +115,13 @@ module holder() {
         // объём за динамиком
         translate([-cav/2, sp_y - cav/2, t_front]) cube([cav, cav, L_cav + 1]);
         // гнездо под раму динамика
-        if (square)
-            translate([-spk_sq/2, sp_y - spk_sq/2, lip]) cube([spk_sq, spk_sq, flange_pkt + 0.01]);
-        else
-            translate([0, sp_y, lip]) cylinder(d = spk_rd, h = flange_pkt + 0.01);
+        translate([0, sp_y, lip]) linear_extrude(flange_pkt + 0.01) spk_outline(spk_clr/2);
         // раскрыв с фаской
-        translate([0, sp_y, -1]) cylinder(d = cone_d, h = t_front + 2);
-        translate([0, sp_y, -0.01]) cylinder(d1 = cone_d + 2*chamfer, d2 = cone_d, h = chamfer);
+        translate([0, sp_y, -1]) linear_extrude(t_front + 2) horn_outline(-horn_in/2);
+        translate([0, sp_y, -0.01]) hull() {
+            linear_extrude(0.01) horn_outline(-horn_in/2 + chamfer);
+            translate([0, 0, chamfer]) linear_extrude(0.01) horn_outline(-horn_in/2);
+        }
         // гнездо микрофона: сквозное отверстие с упорным бортиком спереди
         translate([0, mic_y, mic_lip_t]) cylinder(d = mic_d, h = depth);
         translate([0, mic_y, -1]) cylinder(d = mic_d - 2*mic_lip_w, h = mic_lip_t + 2);
@@ -112,8 +134,8 @@ module back() {
             translate([-W/2, -W/2, 0]) cube([W, W, back_t]);
             translate([-(cav - 2*clr)/2, -(cav - 2*clr)/2, -plug_h]) cube([cav - 2*clr, cav - 2*clr, plug_h]);
             post_len = depth - plug_h - (lip + flange_t);
-            for (sx = [-1, 1], sy = [-1, 1])
-                translate([sx*post_xy - post/2, sy*post_xy - post/2, -plug_h - post_len])
+            for (q = posts)
+                translate([q[0] - post/2, q[1] - post/2, -plug_h - post_len])
                     cube([post, post, post_len]);
         }
         // глухие закладные M3 — объём остаётся герметичным
@@ -125,14 +147,14 @@ module back() {
 
 // условные модели готовых модулей и динамика для сборочных видов
 module speaker_dummy() {
-    basket = min(3, spk_depth - flange_t - 1);
-    color("dimgray") {
-        if (square) translate([-spk_d/2, -spk_d/2, 0]) cube([spk_d, spk_d, flange_t]);
-        else cylinder(d = spk_d, h = flange_t);
-        translate([0, 0, flange_t]) cylinder(d1 = spk_d - 4, d2 = magnet_d, h = basket);
+    basket = max(0, min(3, spk_depth - flange_t - 1));
+    color(shape == "oval" ? "white" : "dimgray") {
+        linear_extrude(flange_t) spk_outline();
+        if (basket > 0)
+            translate([0, 0, flange_t]) cylinder(d1 = min(spk_w, spk_h) - 4, d2 = magnet_d, h = basket);
         translate([0, 0, flange_t + basket]) cylinder(d = magnet_d, h = spk_depth - flange_t - basket);
     }
-    color("black") translate([0, 0, 0.2]) cylinder(d1 = spk_d - 6, d2 = spk_d/3, h = min(3, spk_depth - 1));
+    color("black") translate([0, 0, -0.01]) linear_extrude(0.2) spk_outline(-2);
 }
 
 module mic_module_dummy() {       // круглая плата Ø14 с двумя рядами по 3 штыря
