@@ -1,7 +1,7 @@
 // Держатель элемента акустической ЦАФАР под ГОТОВЫЕ модули (минимум своего монтажа).
 //
 // «Плитка» 39.6 x 59.6 мм (шаг решётки 40 мм по горизонтали, 60 мм по вертикали):
-//   внизу  — динамик 32 мм в закрытом объёме (нет излучения назад);
+//   внизу  — динамик 28…36 мм в закрытом объёме (нет излучения назад);
 //   вверху — круглое гнездо под готовый модуль микрофона ICS-43434 (Ø ≈ 14 мм,
 //            проверить штангенциркулем и поправить mic_d): модуль вставляется сзади
 //            до упорного бортика, выводы смотрят назад, к проводам.
@@ -12,12 +12,17 @@
 // PLA/PETG, сопло 0.4, слой 0.2, 3–4 периметра, заполнение 30 %, без поддержек.
 //
 // Использование:
-//   openscad -D 'part="holder"' -D 'speaker="round32"' -o holder.stl dpaa_element.scad
+//   openscad -D 'part="holder"' -D 'speaker="rd28"' -o holder.stl dpaa_element.scad
 //   part: holder | back | assembly | exploded | array_line | array_planar
 //         | panel_line | panel_planar (2D, для лазерной резки: экспорт в SVG/DXF)
 
 part    = "exploded";
-speaker = "round32";    // "round32" — Dayton Audio CE32A-8 (основной); "square32" — Visaton BF 32 S
+// Динамик (размеры в таблице ниже — типовые, ИЗМЕРИТЬ свою партию и поправить):
+//   "rd28" — круглый 28 мм, 8 Ом 2 Вт, внутренний магнит (основной, ≈ 0.5–1 $);
+//   "rd36" — круглый 36 мм майларовый, 8 Ом 1 Вт (самый дешёвый, 1 Вт — см. mechanics.md);
+//   "rd32" — круглый 32 мм (Dayton Audio CE32A-8 и аналоги);
+//   "sq32" — квадратный 32 мм (Visaton BF 32 S).
+speaker = "rd28";
 
 $fn = 72;
 
@@ -30,21 +35,30 @@ Ht      = pitch_y - gap;      // высота плитки
 sp_y    = -Ht/2 + W/2;        // центр динамика (-10)
 mic_y   =  Ht/2 - (Ht - W)/2; // центр микрофона (+19.8)
 
+// ---------- динамик ----------
+//               [диаметр/сторона рамы, монтажная глубина, толщина обода рамы, Ø магнита]
+spk_table = [["rd28", [28.0,  6.0, 1.5, 16]],
+             ["rd36", [36.0,  5.0, 1.5, 16]],
+             ["rd32", [32.0, 14.5, 1.2, 22]],
+             ["sq32", [32.0, 11.0, 1.2, 22]]];
+spk      = spk_table[search([speaker], spk_table)[0]][1];
+square   = speaker == "sq32";
+spk_d    = spk[0];            // диаметр (или сторона) рамы
+spk_depth= spk[1];            // от лицевой плоскости рамы до торца магнита
+flange_t = spk[2];            // толщина обода, на который давят упоры крышки
+magnet_d = spk[3];
+spk_rd   = spk_d + 0.4;       // гнездо под раму с зазором
+spk_sq   = spk_d + 0.4;
+
 // ---------- лицевая часть ----------
 lip        = 1.5;             // толщина перед рамой динамика
 flange_pkt = 1.8;             // гнездо под раму динамика
 t_front    = lip + flange_pkt;
-cone_d     = 27.5;            // раскрыв перед диффузором
+cone_d     = spk_d - 4.5;     // раскрыв перед диффузором (обод рамы лежит на бортике)
 chamfer    = 1.0;
 
-// ---------- динамик ----------
-spk_sq     = 32.4;
-spk_rd     = 32.4;
-spk_depth  = speaker == "square32" ? 11.0 : 14.5;
-flange_t   = 1.2;             // толщина рамы (уточнить по образцу)
-
 // ---------- объём за динамиком ----------
-cav    = 32.8;
+cav    = max(32.8, spk_rd + 0.4);  // для 36 мм стенки корпуса ≈ 1.4 мм
 L_cav  = 16;
 depth  = t_front + L_cav;
 
@@ -59,7 +73,8 @@ back_t  = 3;
 plug_h  = 2;
 clr     = 0.25;
 post    = 2.4;
-post_xy = speaker == "square32" ? 14.6 : 10.7;
+// упоры давят на обод рамы: у квадратной — в углы, у круглой — на радиусе spk_d/2 - 1.3
+post_xy = square ? 14.6 : (spk_d/2 - 1.3) / sqrt(2);
 m3_xy   = 12;
 m3_d    = 4.2;
 cable_d = 5;
@@ -78,7 +93,7 @@ module holder() {
         // объём за динамиком
         translate([-cav/2, sp_y - cav/2, t_front]) cube([cav, cav, L_cav + 1]);
         // гнездо под раму динамика
-        if (speaker == "square32")
+        if (square)
             translate([-spk_sq/2, sp_y - spk_sq/2, lip]) cube([spk_sq, spk_sq, flange_pkt + 0.01]);
         else
             translate([0, sp_y, lip]) cylinder(d = spk_rd, h = flange_pkt + 0.01);
@@ -110,13 +125,14 @@ module back() {
 
 // условные модели готовых модулей и динамика для сборочных видов
 module speaker_dummy() {
+    basket = min(3, spk_depth - flange_t - 1);
     color("dimgray") {
-        if (speaker == "square32") translate([-16, -16, 0]) cube([32, 32, flange_t]);
-        else cylinder(d = 32, h = flange_t);
-        translate([0, 0, flange_t]) cylinder(d1 = 28, d2 = 18, h = 4);
-        translate([0, 0, flange_t + 4]) cylinder(d = 18, h = spk_depth - flange_t - 4);
+        if (square) translate([-spk_d/2, -spk_d/2, 0]) cube([spk_d, spk_d, flange_t]);
+        else cylinder(d = spk_d, h = flange_t);
+        translate([0, 0, flange_t]) cylinder(d1 = spk_d - 4, d2 = magnet_d, h = basket);
+        translate([0, 0, flange_t + basket]) cylinder(d = magnet_d, h = spk_depth - flange_t - basket);
     }
-    color("black") translate([0, 0, 0.2]) cylinder(d1 = 26, d2 = 12, h = 3);
+    color("black") translate([0, 0, 0.2]) cylinder(d1 = spk_d - 6, d2 = spk_d/3, h = min(3, spk_depth - 1));
 }
 
 module mic_module_dummy() {       // круглая плата Ø14 с двумя рядами по 3 штыря

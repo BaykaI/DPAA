@@ -114,7 +114,7 @@ def draw():
     text(ex + ew / 2, 142, "готовые модули, 40×60 мм", 11.5, color=C["muted"])
     box(ex + 12, 154, ew - 24, 78, "Модуль MAX98357A", ["ЦАП + усилитель класса D", "(готовый)"],
         size=11, title_size=12.5)
-    box(ex + 12, 246, 88, 44, "Динамик", ["CE32A-8"], FILL["ana"], C["ana"], size=11, title_size=12)
+    box(ex + 12, 246, 88, 44, "Динамик", ["28 мм 8 Ом"], FILL["ana"], C["ana"], size=11, title_size=12)
     box(ex + 110, 246, ew - 122, 44, "Модуль", ["ICS-43434"], size=11, title_size=12)
     text(ex + ew / 2, 312, "микрофон: АЦП 24 бит внутри", 11, color=C["muted"])
     text(ex + ew / 2, 330, "динамик: 2 Вт, 8 Ом", 11, color=C["muted"])

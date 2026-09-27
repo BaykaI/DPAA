@@ -147,7 +147,7 @@ def draw():
     cable([(dx + 206, dy + 64), (dx + 206, dy + 78)], C["i2s"], 2)
     text(dx + 74, dy + 58, "от Jn: 5 пров.", 10, "bold", C["i2s"])
     text(dx + 206, dy + 58, "от Jn: 6 пров.", 10, "bold", C["i2s"])
-    box(dx + 14, dy + 214, 120, 60, "BA1", ["динамик CE32A-8"], FILL["ana"], C["ana"], size=10.5, title_size=12)
+    box(dx + 14, dy + 214, 120, 60, "BA1", ["динамик 28 мм 8 Ом"], FILL["ana"], C["ana"], size=10.5, title_size=12)
     cable([(dx + 74, dy + 164), (dx + 74, dy + 212)], C["ana"], 2)
     text(dx + 80, dy + 194, "2 провода", 10, color=C["ana"], anchor="start")
     text(dx + dw / 2, dy + 304, "к усилителю: +5 В, GND, BCLK,", 10.5, color=C["muted"])

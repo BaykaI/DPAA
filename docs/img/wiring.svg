@@ -232,7 +232,7 @@
 <text x="1496" y="268" font-size="10" font-weight="bold" fill="#1f63b0" text-anchor="middle" >от Jn: 6 пров.</text>
 <rect x="1304" y="424" width="120" height="60" rx="8" fill="#eaf5ee" stroke="#2e8b57" stroke-width="1.4"/>
 <text x="1364.0" y="450.58750000000003" font-size="12" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >BA1</text>
-<text x="1364.0" y="465.51250000000005" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >динамик CE32A-8</text>
+<text x="1364.0" y="465.51250000000005" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >динамик 28 мм 8 Ом</text>
 <path d="M1364,374 L1364,422" fill="none" stroke="#2e8b57" stroke-width="2" stroke-linejoin="round"/>
 <text x="1370" y="404" font-size="10" font-weight="normal" fill="#2e8b57" text-anchor="start" >2 провода</text>
 <text x="1430.0" y="514" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >к усилителю: +5 В, GND, BCLK,</text>
