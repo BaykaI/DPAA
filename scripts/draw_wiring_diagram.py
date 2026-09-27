@@ -82,15 +82,17 @@ def draw():
         conn(502, 380 + i * 30, 56, 22, f"J{19 + i}")
     conn(502, 640, 56, 22, "J18 5 В")
     # внутреннее содержимое (для справки)
-    box(575, 270, 200, 44, "буферы 74LVC244 ×9", [], "#ffffff", "#c9c1a8", size=11, title_size=11.5, dash="4 3")
+    box(575, 270, 200, 44, "буферы 74LVC244 ×13", [], "#ffffff", "#c9c1a8", size=11, title_size=11.5, dash="4 3")
     box(575, 322, 200, 44, "питание: Q1, D1, F1–F4", [], FILL["pwr"], "#e0a39b", size=11, title_size=11.5,
         dash="4 3")
-    box(575, 374, 200, 44, "A4 ЦАП PCM5102A", [], FILL["ana"], "#9fd0b3", size=11, title_size=11.5, dash="4 3")
-    box(575, 426, 200, 44, "A5 усилитель наушников", [], FILL["ana"], "#9fd0b3", size=11, title_size=11.5,
+    box(575, 374, 200, 44, "U31 ЦАП PCM5102A", [], FILL["ana"], "#9fd0b3", size=11, title_size=11.5, dash="4 3")
+    box(575, 426, 200, 44, "U32 драйвер TDA1308", [], FILL["ana"], "#9fd0b3", size=11, title_size=11.5,
         dash="4 3")
     box(575, 478, 200, 44, "SW1 кнопка «тест»", [], "#ffffff", "#c9c1a8", size=11, title_size=11.5, dash="4 3")
-    box(575, 530, 200, 44, "U10 стабилизатор 3.3 В", [], "#ffffff", "#c9c1a8", size=11, title_size=11.5,
+    box(575, 530, 200, 44, "U20, U21: стабилиз. 3.3 В", [], "#ffffff", "#c9c1a8", size=11, title_size=11.5,
         dash="4 3")
+    text(675, 598, "собирается на фабрике", 11, "bold", C["muted"])
+    text(675, 614, "(SMT + выводной монтаж)", 11, color=C["muted"])
 
     # A1 P1..P6 -> A3 J19..J24
     for i in range(6):
@@ -117,11 +119,10 @@ def draw():
     for i, y in enumerate(ys):
         out.append(f'<rect x="{ex}" y="{y}" width="{ew}" height="19" rx="3" fill="{FILL["elem"]}" '
                    f'stroke="{C["ana"]}" stroke-width="1.1"/>')
-        text(ex + 36, y + 14, f"A{6 + i}  элемент {i + 1}", 10.5, anchor="start")
-        conn(ex - 2, y, 30, 19, "X1", 9.5)
-        cable([(918, y + 9.5), (ex - 4, y + 9.5)], C["i2s"], 1.8)
+        text(ex + 10, y + 14, f"A{6 + i}  элемент {i + 1}", 10.5, anchor="start")
+        cable([(918, y + 9.5), (ex, y + 9.5)], C["i2s"], 1.8)
     tag(990, 226, "W8–W23", C["i2s"])
-    text(990, 204, "16 шлейфов IDC 2×5, 0.5 м", 10.5, "bold", C["i2s"])
+    text(990, 204, "16 жгутов Dupont F–F, 11 проводов, 30–40 см", 10.5, "bold", C["i2s"])
 
     # зонд и наушники
     box(ex, 628, ew, 34, "A22  калибровочный зонд", [], FILL["blk"], "#9aa3b0", size=10.5, title_size=11.5)
@@ -137,24 +138,23 @@ def draw():
     dx, dy, dw, dh = 1290, 210, 280, 400
     box(dx, dy, dw, dh, None, (), FILL["elem"], C["ana"], rx=10, lw=1.6)
     text(dx + dw / 2, dy + 24, "Элемент A6…A21 (одинаковые)", 13.5, "bold")
-    text(dx + dw / 2, dy + 42, "в 3D-печатном держателе 40×40 мм", 11, color=C["muted"])
-    box(dx + 18, dy + 60, dw - 36, 110, "A6.1  Плата усилителя", ["MAX98357A (ЦАП + класс D)",
-        "LDO 3.3 В, 74LVC1G17 ×2"], "#ffffff", "#9aa3b0", size=10.5, title_size=12)
-    conn(dx + 20, dy + 52, 90, 18, "X1 IDC 2×5", 9.5)
-    conn(dx + 40, dy + 162, 64, 18, "X2 JST", 9.5)
-    conn(dx + 176, dy + 162, 72, 18, "X3 5 конт.", 9.5)
-    box(dx + 18, dy + 250, 110, 64, "BA1", ["динамик", "CE32A-8"], FILL["ana"], C["ana"], size=10.5,
-        title_size=12)
-    box(dx + 150, dy + 250, 112, 64, "A6.2", ["микроплата", "ICS-43434"], "#ffffff", "#9aa3b0", size=10.5,
-        title_size=12)
-    cable([(dx + 72, dy + 180), (dx + 72, dy + 248)], C["ana"], 2)
-    text(dx + 78, dy + 222, "2 провода", 10, color=C["ana"], anchor="start")
-    cable([(dx + 206, dy + 248), (dx + 206, dy + 180)], C["i2s"], 2)
-    text(dx + 212, dy + 222, "5 проводов", 10, color=C["i2s"], anchor="start")
-    text(dx + 212, dy + 236, "30 AWG", 10, color=C["i2s"], anchor="start")
-    text(dx + dw / 2, dy + 342, "X1: 5 В, 5 В, GND, BCLK, GND,", 10.5, color=C["muted"])
-    text(dx + dw / 2, dy + 358, "LRCLK, GND, TXD, GND, RXD", 10.5, color=C["muted"])
-    text(dx + dw / 2, dy + 380, "X3: 3.3 В, GND, SCK, WS, SD", 10.5, color=C["muted"])
+    text(dx + dw / 2, dy + 42, "готовые модули в 3D-держателе 40×60 мм", 11, color=C["muted"])
+    box(dx + 14, dy + 80, 120, 84, "A6.1", ["модуль", "MAX98357A", "(ЦАП + класс D)"], "#ffffff", "#9aa3b0",
+        size=10.5, title_size=12)
+    box(dx + 146, dy + 80, 120, 84, "A6.2", ["модуль", "ICS-43434", "(микрофон + АЦП)"], "#ffffff", "#9aa3b0",
+        size=10.5, title_size=12)
+    cable([(dx + 74, dy + 64), (dx + 74, dy + 78)], C["i2s"], 2)
+    cable([(dx + 206, dy + 64), (dx + 206, dy + 78)], C["i2s"], 2)
+    text(dx + 74, dy + 58, "от Jn: 5 пров.", 10, "bold", C["i2s"])
+    text(dx + 206, dy + 58, "от Jn: 6 пров.", 10, "bold", C["i2s"])
+    box(dx + 14, dy + 214, 120, 60, "BA1", ["динамик CE32A-8"], FILL["ana"], C["ana"], size=10.5, title_size=12)
+    cable([(dx + 74, dy + 164), (dx + 74, dy + 212)], C["ana"], 2)
+    text(dx + 80, dy + 194, "2 провода", 10, color=C["ana"], anchor="start")
+    text(dx + dw / 2, dy + 304, "к усилителю: +5 В, GND, BCLK,", 10.5, color=C["muted"])
+    text(dx + dw / 2, dy + 320, "LRCLK, DIN (нечётный ряд Jn)", 10.5, color=C["muted"])
+    text(dx + dw / 2, dy + 344, "к микрофону: +3.3 В, GND, SCK,", 10.5, color=C["muted"])
+    text(dx + dw / 2, dy + 360, "WS, SD, L/R→GND (чётный ряд Jn)", 10.5, color=C["muted"])
+    text(dx + dw / 2, dy + 384, "своих плат в элементе нет", 10.5, "bold", C["ana"])
     cable([(ex + ew, 245), (dx, 245)], C["muted"], 1.2, dash="3 3")
 
     # ---------------- G1: блок питания ----------------
@@ -171,13 +171,13 @@ def draw():
     rows = [
         ("W1–W6", "A1: P1–P6", "A3: J19–J24", "шлейф IDC 2×6 (PMOD)", "12", "0.3 м", "см. раскладку PMOD"),
         ("W7", "A3: J25", "A2: гребёнка", "провода Dupont", "3", "0.2 м", "UART TX, RX, GND"),
-        ("W8–W23", "A3: J1–J16", "A6–A21: X1", "шлейф IDC 2×5", "10", "0.5 м", "5 В, GND, BCLK, LRCLK, TXD, RXD"),
-        ("W24", "A3: J17", "A22: RJ45", "CAT5, RJ45 (T568B)", "8", "3 м", "BCLK, LRCLK, SD, 5 В, GND"),
+        ("W8–W23", "A3: J1–J16", "A6.1, A6.2", "провода Dupont F–F", "11", "30–40 см", "5 к усилителю, 6 к микрофону"),
+        ("W24", "A3: J17", "A22: RJ45", "CAT5, RJ45 (T568B)", "8", "3 м", "BCLK, LRCLK, SD, 3.3 В, GND"),
         ("W25", "G1", "A3: J18", "шнур DC 5.5/2.1 мм", "2", "1.5 м", "+5 В, GND (до 5 А)"),
         ("W26", "G2 или ноутбук", "A1: XS1", "USB-C", "—", "1 м", "питание, JTAG, UART (DAPLink)"),
         ("W27", "G2", "A2: USB", "USB-C", "—", "1 м", "питание ESP32"),
-        ("—", "A6.1: X2", "BA1", "провод 0.35 мм²", "2", "0.1 м", "выход усилителя"),
-        ("—", "A6.1: X3", "A6.2", "провод 30 AWG", "5", "0.1 м", "3.3 В, GND, SCK, WS, SD"),
+        ("—", "A6.1: OUT±", "BA1", "провод 0.35 мм²", "2", "0.1 м", "выход усилителя"),
+        ("—", "клеммы RJ45 зонда", "A22: модуль", "провода Dupont", "6", "0.1 м", "VDD, GND, SCK, WS, SD, L/R"),
         ("—", "A3: J26, J27", "BF1, BF2", "штекер 3.5 мм", "3", "—", "левое ухо — луч 0, правое — луч 1"),
         ("(W28)", "A3: J28", "адаптер CP2102", "провода Dupont", "3", "0.2 м", "резерв: UART к ноутбуку"),
     ]

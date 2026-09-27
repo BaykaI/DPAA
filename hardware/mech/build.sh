@@ -9,7 +9,7 @@ for sp in round32 square32; do
     openscad -q -D "part=\"$pt\"" -D "speaker=\"$sp\"" -o "stl/${pt}_${sp}.stl" dpaa_element.scad
   done
 done
-openscad -q -D 'part="micboard"' -o stl/micboard_dummy.stl dpaa_element.scad
+
 for pl in panel_line panel_planar; do
   openscad -q -D "part=\"$pl\"" -o "stl/$pl.svg" dpaa_element.scad
   openscad -q -D "part=\"$pl\"" -o "stl/$pl.dxf" dpaa_element.scad

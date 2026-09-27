@@ -85,17 +85,19 @@
 <rect x="502" y="640" width="56" height="22" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
 <text x="530.0" y="654.78" font-size="10.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >J18 5 В</text>
 <rect x="575" y="270" width="200" height="44" rx="8" fill="#ffffff" stroke="#c9c1a8" stroke-width="1.4" stroke-dasharray="4 3"/>
-<text x="675.0" y="295.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >буферы 74LVC244 ×9</text>
+<text x="675.0" y="295.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >буферы 74LVC244 ×13</text>
 <rect x="575" y="322" width="200" height="44" rx="8" fill="#fbecea" stroke="#e0a39b" stroke-width="1.4" stroke-dasharray="4 3"/>
 <text x="675.0" y="347.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >питание: Q1, D1, F1–F4</text>
 <rect x="575" y="374" width="200" height="44" rx="8" fill="#eaf5ee" stroke="#9fd0b3" stroke-width="1.4" stroke-dasharray="4 3"/>
-<text x="675.0" y="399.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >A4 ЦАП PCM5102A</text>
+<text x="675.0" y="399.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >U31 ЦАП PCM5102A</text>
 <rect x="575" y="426" width="200" height="44" rx="8" fill="#eaf5ee" stroke="#9fd0b3" stroke-width="1.4" stroke-dasharray="4 3"/>
-<text x="675.0" y="451.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >A5 усилитель наушников</text>
+<text x="675.0" y="451.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >U32 драйвер TDA1308</text>
 <rect x="575" y="478" width="200" height="44" rx="8" fill="#ffffff" stroke="#c9c1a8" stroke-width="1.4" stroke-dasharray="4 3"/>
 <text x="675.0" y="503.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >SW1 кнопка «тест»</text>
 <rect x="575" y="530" width="200" height="44" rx="8" fill="#ffffff" stroke="#c9c1a8" stroke-width="1.4" stroke-dasharray="4 3"/>
-<text x="675.0" y="555.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >U10 стабилизатор 3.3 В</text>
+<text x="675.0" y="555.85" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >U20, U21: стабилиз. 3.3 В</text>
+<text x="675" y="598" font-size="11" font-weight="bold" fill="#5b6270" text-anchor="middle" >собирается на фабрике</text>
+<text x="675" y="614" font-size="11" font-weight="normal" fill="#5b6270" text-anchor="middle" >(SMT + выводной монтаж)</text>
 <path d="M318,391 L500,391" fill="none" stroke="#1f63b0" stroke-width="3.2" stroke-linejoin="round"/>
 <path d="M318,421 L500,421" fill="none" stroke="#1f63b0" stroke-width="3.2" stroke-linejoin="round"/>
 <path d="M318,451 L500,451" fill="none" stroke="#1f63b0" stroke-width="3.2" stroke-linejoin="round"/>
@@ -149,88 +151,56 @@
 <rect x="872" y="700" width="60" height="20" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
 <text x="902.0" y="713.6" font-size="10" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >J27 ⌀3.5</text>
 <rect x="1060" y="236" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="250" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A6  элемент 1</text>
-<rect x="1058" y="236" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="248.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,245.5 L1056,245.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="250" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A6  элемент 1</text>
+<path d="M918,245.5 L1060,245.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="260" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="274" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A7  элемент 2</text>
-<rect x="1058" y="260" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="272.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,269.5 L1056,269.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="274" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A7  элемент 2</text>
+<path d="M918,269.5 L1060,269.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="284" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="298" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A8  элемент 3</text>
-<rect x="1058" y="284" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="296.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,293.5 L1056,293.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="298" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A8  элемент 3</text>
+<path d="M918,293.5 L1060,293.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="308" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="322" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A9  элемент 4</text>
-<rect x="1058" y="308" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="320.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,317.5 L1056,317.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="322" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A9  элемент 4</text>
+<path d="M918,317.5 L1060,317.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="332" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="346" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A10  элемент 5</text>
-<rect x="1058" y="332" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="344.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,341.5 L1056,341.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="346" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A10  элемент 5</text>
+<path d="M918,341.5 L1060,341.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="356" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="370" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A11  элемент 6</text>
-<rect x="1058" y="356" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="368.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,365.5 L1056,365.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="370" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A11  элемент 6</text>
+<path d="M918,365.5 L1060,365.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="380" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="394" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A12  элемент 7</text>
-<rect x="1058" y="380" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="392.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,389.5 L1056,389.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="394" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A12  элемент 7</text>
+<path d="M918,389.5 L1060,389.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="404" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="418" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A13  элемент 8</text>
-<rect x="1058" y="404" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="416.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,413.5 L1056,413.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="418" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A13  элемент 8</text>
+<path d="M918,413.5 L1060,413.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="428" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="442" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A14  элемент 9</text>
-<rect x="1058" y="428" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="440.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,437.5 L1056,437.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="442" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A14  элемент 9</text>
+<path d="M918,437.5 L1060,437.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="452" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="466" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A15  элемент 10</text>
-<rect x="1058" y="452" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="464.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,461.5 L1056,461.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="466" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A15  элемент 10</text>
+<path d="M918,461.5 L1060,461.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="476" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="490" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A16  элемент 11</text>
-<rect x="1058" y="476" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="488.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,485.5 L1056,485.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="490" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A16  элемент 11</text>
+<path d="M918,485.5 L1060,485.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="500" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="514" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A17  элемент 12</text>
-<rect x="1058" y="500" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="512.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,509.5 L1056,509.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="514" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A17  элемент 12</text>
+<path d="M918,509.5 L1060,509.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="524" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="538" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A18  элемент 13</text>
-<rect x="1058" y="524" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="536.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,533.5 L1056,533.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="538" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A18  элемент 13</text>
+<path d="M918,533.5 L1060,533.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="548" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="562" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A19  элемент 14</text>
-<rect x="1058" y="548" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="560.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,557.5 L1056,557.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="562" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A19  элемент 14</text>
+<path d="M918,557.5 L1060,557.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="572" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="586" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A20  элемент 15</text>
-<rect x="1058" y="572" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="584.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,581.5 L1056,581.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="586" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A20  элемент 15</text>
+<path d="M918,581.5 L1060,581.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="1060" y="596" width="190" height="19" rx="3" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.1"/>
-<text x="1096" y="610" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A21  элемент 16</text>
-<rect x="1058" y="596" width="30" height="19" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1073.0" y="608.92" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1</text>
-<path d="M918,605.5 L1056,605.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
+<text x="1070" y="610" font-size="10.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A21  элемент 16</text>
+<path d="M918,605.5 L1060,605.5" fill="none" stroke="#1f63b0" stroke-width="1.8" stroke-linejoin="round"/>
 <rect x="965.2" y="214" width="49.6" height="17.6" rx="3" fill="#ffffff" stroke="#1f63b0" stroke-width="1"/>
 <text x="990" y="227" font-size="11" font-weight="bold" fill="#1f63b0" text-anchor="middle" >W8–W23</text>
-<text x="990" y="204" font-size="10.5" font-weight="bold" fill="#1f63b0" text-anchor="middle" >16 шлейфов IDC 2×5, 0.5 м</text>
+<text x="990" y="204" font-size="10.5" font-weight="bold" fill="#1f63b0" text-anchor="middle" >16 жгутов Dupont F–F, 11 проводов, 30–40 см</text>
 <rect x="1060" y="628" width="190" height="34" rx="8" fill="#ffffff" stroke="#9aa3b0" stroke-width="1.4"/>
 <text x="1155.0" y="648.675" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >A22  калибровочный зонд</text>
 <path d="M932,644 L1060,644" fill="none" stroke="#1f63b0" stroke-width="2.2" stroke-linejoin="round"/>
@@ -245,33 +215,31 @@
 <text x="1203.0" y="690" font-size="10.5" font-weight="normal" fill="#2e8b57" text-anchor="start" >наушники</text>
 <rect x="1290" y="210" width="280" height="400" rx="10" fill="#eef6f0" stroke="#2e8b57" stroke-width="1.6"/>
 <text x="1430.0" y="234" font-size="13.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >Элемент A6…A21 (одинаковые)</text>
-<text x="1430.0" y="252" font-size="11" font-weight="normal" fill="#5b6270" text-anchor="middle" >в 3D-печатном держателе 40×40 мм</text>
-<rect x="1308" y="270" width="244" height="110" rx="8" fill="#ffffff" stroke="#9aa3b0" stroke-width="1.4"/>
-<text x="1430.0" y="314.5" font-size="12" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >A6.1  Плата усилителя</text>
-<text x="1430.0" y="329.425" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >MAX98357A (ЦАП + класс D)</text>
-<text x="1430.0" y="343.6" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >LDO 3.3 В, 74LVC1G17 ×2</text>
-<rect x="1310" y="262" width="90" height="18" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1355.0" y="274.42" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X1 IDC 2×5</text>
-<rect x="1330" y="372" width="64" height="18" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1362.0" y="384.42" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X2 JST</text>
-<rect x="1466" y="372" width="72" height="18" rx="2" fill="#fdf6d8" stroke="#8a7a3a" stroke-width="1.1"/>
-<text x="1502.0" y="384.42" font-size="9.5" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >X3 5 конт.</text>
-<rect x="1308" y="460" width="110" height="64" rx="8" fill="#eaf5ee" stroke="#2e8b57" stroke-width="1.4"/>
-<text x="1363.0" y="481.5" font-size="12" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >BA1</text>
-<text x="1363.0" y="496.425" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >динамик</text>
-<text x="1363.0" y="510.6" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >CE32A-8</text>
-<rect x="1440" y="460" width="112" height="64" rx="8" fill="#ffffff" stroke="#9aa3b0" stroke-width="1.4"/>
-<text x="1496.0" y="481.5" font-size="12" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >A6.2</text>
-<text x="1496.0" y="496.425" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >микроплата</text>
-<text x="1496.0" y="510.6" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >ICS-43434</text>
-<path d="M1362,390 L1362,458" fill="none" stroke="#2e8b57" stroke-width="2" stroke-linejoin="round"/>
-<text x="1368" y="432" font-size="10" font-weight="normal" fill="#2e8b57" text-anchor="start" >2 провода</text>
-<path d="M1496,458 L1496,390" fill="none" stroke="#1f63b0" stroke-width="2" stroke-linejoin="round"/>
-<text x="1502" y="432" font-size="10" font-weight="normal" fill="#1f63b0" text-anchor="start" >5 проводов</text>
-<text x="1502" y="446" font-size="10" font-weight="normal" fill="#1f63b0" text-anchor="start" >30 AWG</text>
-<text x="1430.0" y="552" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >X1: 5 В, 5 В, GND, BCLK, GND,</text>
-<text x="1430.0" y="568" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >LRCLK, GND, TXD, GND, RXD</text>
-<text x="1430.0" y="590" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >X3: 3.3 В, GND, SCK, WS, SD</text>
+<text x="1430.0" y="252" font-size="11" font-weight="normal" fill="#5b6270" text-anchor="middle" >готовые модули в 3D-держателе 40×60 мм</text>
+<rect x="1304" y="290" width="120" height="84" rx="8" fill="#ffffff" stroke="#9aa3b0" stroke-width="1.4"/>
+<text x="1364.0" y="314.4125" font-size="12" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >A6.1</text>
+<text x="1364.0" y="329.33750000000003" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >модуль</text>
+<text x="1364.0" y="343.51250000000005" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >MAX98357A</text>
+<text x="1364.0" y="357.68750000000006" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >(ЦАП + класс D)</text>
+<rect x="1436" y="290" width="120" height="84" rx="8" fill="#ffffff" stroke="#9aa3b0" stroke-width="1.4"/>
+<text x="1496.0" y="314.4125" font-size="12" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >A6.2</text>
+<text x="1496.0" y="329.33750000000003" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >модуль</text>
+<text x="1496.0" y="343.51250000000005" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >ICS-43434</text>
+<text x="1496.0" y="357.68750000000006" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >(микрофон + АЦП)</text>
+<path d="M1364,274 L1364,288" fill="none" stroke="#1f63b0" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1496,274 L1496,288" fill="none" stroke="#1f63b0" stroke-width="2" stroke-linejoin="round"/>
+<text x="1364" y="268" font-size="10" font-weight="bold" fill="#1f63b0" text-anchor="middle" >от Jn: 5 пров.</text>
+<text x="1496" y="268" font-size="10" font-weight="bold" fill="#1f63b0" text-anchor="middle" >от Jn: 6 пров.</text>
+<rect x="1304" y="424" width="120" height="60" rx="8" fill="#eaf5ee" stroke="#2e8b57" stroke-width="1.4"/>
+<text x="1364.0" y="450.58750000000003" font-size="12" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >BA1</text>
+<text x="1364.0" y="465.51250000000005" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >динамик CE32A-8</text>
+<path d="M1364,374 L1364,422" fill="none" stroke="#2e8b57" stroke-width="2" stroke-linejoin="round"/>
+<text x="1370" y="404" font-size="10" font-weight="normal" fill="#2e8b57" text-anchor="start" >2 провода</text>
+<text x="1430.0" y="514" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >к усилителю: +5 В, GND, BCLK,</text>
+<text x="1430.0" y="530" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >LRCLK, DIN (нечётный ряд Jn)</text>
+<text x="1430.0" y="554" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >к микрофону: +3.3 В, GND, SCK,</text>
+<text x="1430.0" y="570" font-size="10.5" font-weight="normal" fill="#5b6270" text-anchor="middle" >WS, SD, L/R→GND (чётный ряд Jn)</text>
+<text x="1430.0" y="594" font-size="10.5" font-weight="bold" fill="#2e8b57" text-anchor="middle" >своих плат в элементе нет</text>
 <path d="M1250,245 L1290,245" fill="none" stroke="#5b6270" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="3 3"/>
 <rect x="300" y="620" width="170" height="60" rx="8" fill="#fbecea" stroke="#c0392b" stroke-width="1.4"/>
 <text x="385.0" y="646.4250000000001" font-size="13" font-weight="bold" fill="#1d1d1f" text-anchor="middle" >G1  БП 5 В 6 А</text>
@@ -307,11 +275,11 @@
 <line x1="36" y1="860" x2="1564" y2="860" stroke="#e1e5eb" stroke-width="1"/>
 <text x="40" y="877" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="start" >W8–W23</text>
 <text x="130" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A3: J1–J16</text>
-<text x="330" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A6–A21: X1</text>
-<text x="560" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >шлейф IDC 2×5</text>
-<text x="900" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >10</text>
-<text x="960" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >0.5 м</text>
-<text x="1050" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >5 В, GND, BCLK, LRCLK, TXD, RXD</text>
+<text x="330" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A6.1, A6.2</text>
+<text x="560" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >провода Dupont F–F</text>
+<text x="900" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >11</text>
+<text x="960" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >30–40 см</text>
+<text x="1050" y="877" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >5 к усилителю, 6 к микрофону</text>
 <line x1="36" y1="885" x2="1564" y2="885" stroke="#e1e5eb" stroke-width="1"/>
 <text x="40" y="902" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="start" >W24</text>
 <text x="130" y="902" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A3: J17</text>
@@ -319,7 +287,7 @@
 <text x="560" y="902" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >CAT5, RJ45 (T568B)</text>
 <text x="900" y="902" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >8</text>
 <text x="960" y="902" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >3 м</text>
-<text x="1050" y="902" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >BCLK, LRCLK, SD, 5 В, GND</text>
+<text x="1050" y="902" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >BCLK, LRCLK, SD, 3.3 В, GND</text>
 <line x1="36" y1="910" x2="1564" y2="910" stroke="#e1e5eb" stroke-width="1"/>
 <text x="40" y="927" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="start" >W25</text>
 <text x="130" y="927" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >G1</text>
@@ -346,7 +314,7 @@
 <text x="1050" y="977" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >питание ESP32</text>
 <line x1="36" y1="985" x2="1564" y2="985" stroke="#e1e5eb" stroke-width="1"/>
 <text x="40" y="1002" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="start" >—</text>
-<text x="130" y="1002" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A6.1: X2</text>
+<text x="130" y="1002" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A6.1: OUT±</text>
 <text x="330" y="1002" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >BA1</text>
 <text x="560" y="1002" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >провод 0.35 мм²</text>
 <text x="900" y="1002" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >2</text>
@@ -354,12 +322,12 @@
 <text x="1050" y="1002" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >выход усилителя</text>
 <line x1="36" y1="1010" x2="1564" y2="1010" stroke="#e1e5eb" stroke-width="1"/>
 <text x="40" y="1027" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="start" >—</text>
-<text x="130" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A6.1: X3</text>
-<text x="330" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A6.2</text>
-<text x="560" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >провод 30 AWG</text>
-<text x="900" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >5</text>
+<text x="130" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >клеммы RJ45 зонда</text>
+<text x="330" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A22: модуль</text>
+<text x="560" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >провода Dupont</text>
+<text x="900" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >6</text>
 <text x="960" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >0.1 м</text>
-<text x="1050" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >3.3 В, GND, SCK, WS, SD</text>
+<text x="1050" y="1027" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >VDD, GND, SCK, WS, SD, L/R</text>
 <line x1="36" y1="1035" x2="1564" y2="1035" stroke="#e1e5eb" stroke-width="1"/>
 <text x="40" y="1052" font-size="11.5" font-weight="bold" fill="#1d1d1f" text-anchor="start" >—</text>
 <text x="130" y="1052" font-size="11.5" font-weight="normal" fill="#1d1d1f" text-anchor="start" >A3: J26, J27</text>

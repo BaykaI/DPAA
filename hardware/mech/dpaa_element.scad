@@ -1,22 +1,19 @@
-// Держатель элемента акустической ЦАФАР: динамик + микрофон в одном корпусе.
+// Держатель элемента акустической ЦАФАР под ГОТОВЫЕ модули (минимум своего монтажа).
 //
-// «Плитка» 39.6 x 39.6 мм = шаг решётки 40 мм — из одинаковых плиток собирается
-// и линейная решётка 16x1, и плоская 8x4 / 8x8 (сканирование в двух плоскостях).
-//
-//   спереди:  раскрыв динамика с фаской + углубление под микроплату микрофона
-//             (ICS-43434, 8x8 мм) в правом верхнем углу;
-//   внутри:   закрытый объём за динамиком (нет излучения назад, микрофон
-//             акустически отделён от тыла динамика);
-//   сзади:    крышка с упорами, прижимающими раму динамика, 2 закладные гайки M3
-//             для крепления к задней панели и паз для платы усилителя.
+// «Плитка» 39.6 x 59.6 мм (шаг решётки 40 мм по горизонтали, 60 мм по вертикали):
+//   внизу  — динамик 32 мм в закрытом объёме (нет излучения назад);
+//   вверху — круглое гнездо под готовый модуль микрофона ICS-43434 (Ø ≈ 14 мм,
+//            проверить штангенциркулем и поправить mic_d): модуль вставляется сзади
+//            до упорного бортика, выводы смотрят назад, к проводам.
+// Модуль усилителя MAX98357A крепится стяжкой к задней панели за динамиком.
 //
 // Система координат: x — вправо, y — вверх, z — от лицевой плоскости назад.
 // Печать: держатель — лицом вниз на стол; крышка — наружной стороной вниз.
-// PLA/PETG, сопло 0.4, слой 0.2, заполнение 30 %, без поддержек.
+// PLA/PETG, сопло 0.4, слой 0.2, 3–4 периметра, заполнение 30 %, без поддержек.
 //
 // Использование:
-//   openscad -D 'part="holder"' -D 'speaker="square32"' -o holder.stl dpaa_element.scad
-//   part: holder | back | micboard | assembly | exploded | array_line | array_planar
+//   openscad -D 'part="holder"' -D 'speaker="round32"' -o holder.stl dpaa_element.scad
+//   part: holder | back | assembly | exploded | array_line | array_planar
 //         | panel_line | panel_planar (2D, для лазерной резки: экспорт в SVG/DXF)
 
 part    = "exploded";
@@ -25,113 +22,93 @@ speaker = "round32";    // "round32" — Dayton Audio CE32A-8 (основной)
 $fn = 72;
 
 // ---------- решётка ----------
-pitch = 40;
-gap   = 0.4;
-W     = pitch - gap;          // размер плитки
+pitch_x = 40;
+pitch_y = 60;
+gap     = 0.4;
+W       = pitch_x - gap;      // ширина плитки
+Ht      = pitch_y - gap;      // высота плитки
+sp_y    = -Ht/2 + W/2;        // центр динамика (-10)
+mic_y   =  Ht/2 - (Ht - W)/2; // центр микрофона (+19.8)
 
 // ---------- лицевая часть ----------
-lip        = 3.2;             // толщина перед рамой динамика (глубина под микроплату + 0.8)
-flange_pkt = 1.8;             // глубина гнезда под раму динамика
+lip        = 1.5;             // толщина перед рамой динамика
+flange_pkt = 1.8;             // гнездо под раму динамика
 t_front    = lip + flange_pkt;
 cone_d     = 27.5;            // раскрыв перед диффузором
-chamfer    = 0.8;             // фаска раскрыва на лицевой стороне
+chamfer    = 1.0;
 
 // ---------- динамик ----------
-spk_sq     = 32.4;            // гнездо под квадратную раму 32 x 32 (+0.4 зазор)
-spk_rd     = 32.4;            // гнездо под круглую раму Ø32
-spk_depth  = speaker == "square32" ? 11.0 : 14.5;   // монтажная глубина по данным производителей
-flange_t   = 1.2;             // толщина рамы (уточнить по образцу; компенсируется прокладкой)
+spk_sq     = 32.4;
+spk_rd     = 32.4;
+spk_depth  = speaker == "square32" ? 11.0 : 14.5;
+flange_t   = 1.2;             // толщина рамы (уточнить по образцу)
 
 // ---------- объём за динамиком ----------
-cav    = 32.8;                // внутренний размер корпуса
-L_cav  = 16;                  // длина объёма
-depth  = t_front + L_cav;     // полная глубина держателя
+cav    = 32.8;
+L_cav  = 16;
+depth  = t_front + L_cav;
 
-// ---------- микрофон ----------
-mic_xy     = [14.8, 14.8];        // центр микроплаты (и акустического отверстия)
-mic_board  = 8.2;             // гнездо под плату 8.0 x 8.0
-mic_recess = 2.4;             // плата 0.8 + микрофон 1.0 + зазор
-wire_xy    = [17.8, 17.8];    // канал проводов микрофона
-wire_d     = 2.0;
+// ---------- модуль микрофона ----------
+mic_d     = 14.2;             // диаметр гнезда = диаметр модуля + 0.2 (ИЗМЕРИТЬ модуль!)
+mic_lip_w = 0.9;              // ширина упорного бортика спереди
+mic_lip_t = 0.8;              // толщина бортика
+wall      = 3;                // боковые стенки верхней части
 
 // ---------- крышка ----------
 back_t  = 3;
 plug_h  = 2;
 clr     = 0.25;
 post    = 2.4;
-post_xy = speaker == "square32" ? 14.6 : 10.7;   // упоры в углы рамы / в кольцо рамы
-m3_xy   = 12;                 // закладные M3 в (±12, 0)
-m3_d    = 4.2;                // под латунную закладную M3 x 4.5
+post_xy = speaker == "square32" ? 14.6 : 10.7;
+m3_xy   = 12;
+m3_d    = 4.2;
 cable_d = 5;
-cable_y = -10;
-slot_w  = 1.7;                // паз под плату усилителя 1.6 мм
-rib_t   = 1.2;
-rib_h   = 6;
-rib_y   = [-2, 16];
+cable_y = -10;                // относительно центра динамика
 
 // =====================================================================
 module holder() {
     difference() {
-        translate([-W/2, -W/2, 0]) cube([W, W, depth]);
+        union() {
+            translate([-W/2, -Ht/2, 0]) cube([W, Ht, t_front]);                        // лицевая пластина
+            translate([-W/2, sp_y - W/2, 0]) cube([W, W, depth]);                       // корпус динамика
+            for (sx = [-1, 1])                                                          // стенки верхней части
+                translate([sx > 0 ? W/2 - wall : -W/2, sp_y + W/2 - 1, 0]) cube([wall, Ht - W + 1, depth]);
+            translate([-W/2, Ht/2 - 2, 0]) cube([W, 2, depth]);                         // верхняя кромка
+        }
         // объём за динамиком
-        translate([-cav/2, -cav/2, t_front]) cube([cav, cav, L_cav + 1]);
+        translate([-cav/2, sp_y - cav/2, t_front]) cube([cav, cav, L_cav + 1]);
         // гнездо под раму динамика
         if (speaker == "square32")
-            translate([-spk_sq/2, -spk_sq/2, lip]) cube([spk_sq, spk_sq, flange_pkt + 0.01]);
+            translate([-spk_sq/2, sp_y - spk_sq/2, lip]) cube([spk_sq, spk_sq, flange_pkt + 0.01]);
         else
-            translate([0, 0, lip]) cylinder(d = spk_rd, h = flange_pkt + 0.01);
+            translate([0, sp_y, lip]) cylinder(d = spk_rd, h = flange_pkt + 0.01);
         // раскрыв с фаской
-        translate([0, 0, -1]) cylinder(d = cone_d, h = t_front + 2);
-        translate([0, 0, -0.01]) cylinder(d1 = cone_d + 2*chamfer, d2 = cone_d, h = chamfer);
-        // гнездо микроплаты (открыто вперёд)
-        translate([mic_xy[0] - mic_board/2, mic_xy[1] - mic_board/2, -0.01])
-            cube([mic_board, mic_board, mic_recess]);
-        // канал проводов: сквозь лицевую часть, затем в объём за динамиком
-        translate([wire_xy[0], wire_xy[1], -1]) cylinder(d = wire_d, h = t_front + 3);
-        hull() {
-            translate([wire_xy[0], wire_xy[1], t_front + 0.5]) cylinder(d = wire_d, h = 1.5);
-            translate([cav/2 - 2, cav/2 - 2, t_front + 0.5]) cylinder(d = wire_d, h = 1.5);
-        }
+        translate([0, sp_y, -1]) cylinder(d = cone_d, h = t_front + 2);
+        translate([0, sp_y, -0.01]) cylinder(d1 = cone_d + 2*chamfer, d2 = cone_d, h = chamfer);
+        // гнездо микрофона: сквозное отверстие с упорным бортиком спереди
+        translate([0, mic_y, mic_lip_t]) cylinder(d = mic_d, h = depth);
+        translate([0, mic_y, -1]) cylinder(d = mic_d - 2*mic_lip_w, h = mic_lip_t + 2);
     }
 }
 
 module back() {
     difference() {
         union() {
-            // пластина крышки (z отсчитывается от задней грани держателя)
             translate([-W/2, -W/2, 0]) cube([W, W, back_t]);
-            // пробка, входящая в объём
             translate([-(cav - 2*clr)/2, -(cav - 2*clr)/2, -plug_h]) cube([cav - 2*clr, cav - 2*clr, plug_h]);
-            // упоры, прижимающие раму динамика
             post_len = depth - plug_h - (lip + flange_t);
             for (sx = [-1, 1], sy = [-1, 1])
                 translate([sx*post_xy - post/2, sy*post_xy - post/2, -plug_h - post_len])
                     cube([post, post, post_len]);
-            // рёбра паза под плату усилителя (плата 1.6 мм, ширина 32 мм)
-            for (sx = [-1, 1])
-                translate([sx > 0 ? slot_w/2 : -slot_w/2 - rib_t, rib_y[0], back_t])
-                    cube([rib_t, rib_y[1] - rib_y[0], rib_h]);
         }
-        // закладные M3 со стороны задней панели — глухие, объём остаётся герметичным
+        // глухие закладные M3 — объём остаётся герметичным
         for (sx = [-1, 1]) translate([sx*m3_xy, 0, -plug_h + 0.8]) cylinder(d = m3_d, h = back_t + plug_h);
-        // кабель динамика и микрофона
+        // провода динамика (после монтажа залить термоклеем)
         translate([0, cable_y, -plug_h - 1]) cylinder(d = cable_d, h = back_t + plug_h + 2);
     }
 }
 
-// микроплата микрофона 8 x 8 x 0.8 мм, ICS-43434 на тыльной стороне,
-// звуковое отверстие Ø0.8 мм через плату по центру микрофона
-module micboard() {
-    difference() {
-        color("darkgreen") translate([-4, -4, 0]) cube([8, 8, 0.8]);
-        translate([0, 0, -1]) cylinder(d = 0.8, h = 3, $fn = 16);
-    }
-    color("silver") translate([-1.75, -1.325, 0.8]) cube([3.5, 2.65, 0.98]);
-    // контактные площадки проводов: VDD, GND, SCK, WS, SD
-    for (i = [0:4]) color("gold") translate([2.3, -3.2 + i*1.4, 0.8]) cube([1.2, 0.8, 0.05]);
-}
-
-// условная модель динамика для сборочных видов
+// условные модели готовых модулей и динамика для сборочных видов
 module speaker_dummy() {
     color("dimgray") {
         if (speaker == "square32") translate([-16, -16, 0]) cube([32, 32, flange_t]);
@@ -142,40 +119,51 @@ module speaker_dummy() {
     color("black") translate([0, 0, 0.2]) cylinder(d1 = 26, d2 = 12, h = 3);
 }
 
+module mic_module_dummy() {       // круглая плата Ø14 с двумя рядами по 3 штыря
+    color("black") cylinder(d = mic_d - 0.2, h = 1.6);
+    color("silver") translate([-1.75, -1.3, 1.6]) cube([3.5, 2.6, 1]);
+    for (sx = [-1, 1], i = [-1:1])
+        color("gold") translate([sx*4.5, i*2.54, 1.6]) cylinder(d = 0.64, h = 8, $fn = 8);
+}
+
+module amp_module_dummy() {       // модуль MAX98357A ~18 x 19 мм
+    color("royalblue") translate([-9, -9.5, 0]) cube([18, 19, 1.6]);
+    color("black") translate([-1.5, -1.5, 1.6]) cube([3, 3, 0.8]);
+}
+
 module element(explode = 0) {
     color("lightsteelblue") holder();
-    translate([0, 0, lip + explode*1.6]) speaker_dummy();          // вставляется сзади
-    // лицевая сторона платы утоплена на 0.6 мм, микрофон — на тыльной стороне платы
-    translate([mic_xy[0], mic_xy[1], mic_recess - 0.8 - 0.98 - explode*1.2]) micboard();
-    color("slategray") translate([0, 0, depth + explode*2.2]) back();
+    translate([0, sp_y, lip + explode*1.6]) speaker_dummy();
+    translate([0, mic_y, mic_lip_t + explode*1.0]) mic_module_dummy();
+    color("slategray") translate([0, sp_y, depth + explode*2.2]) back();
+    translate([0, sp_y + 2, depth + back_t + 4 + explode*3.2]) amp_module_dummy();   // на задней панели
 }
 
 // 2D: задняя панель (лазерная резка) для nx x ny элементов
-module panel(nx, ny, margin = 20) {
+module panel(nx, ny, margin = 20, pt = 4) {
     difference() {
-        square([nx*pitch + 2*margin, ny*pitch + 2*margin]);
+        square([nx*pitch_x + 2*margin, ny*pitch_y + 2*margin]);
         for (i = [0:nx-1], j = [0:ny-1])
-            translate([margin + pitch/2 + i*pitch, margin + pitch/2 + j*pitch]) {
-                // окно под рёбра, плату усилителя и кабель
-                translate([-7, -18]) square([14, 36]);
-                for (sx = [-1, 1]) translate([sx*m3_xy, 0]) circle(d = 3.4);
+            translate([margin + pitch_x/2 + i*pitch_x, margin + pitch_y/2 + j*pitch_y]) {
+                for (sx = [-1, 1]) translate([sx*m3_xy, sp_y]) circle(d = 3.4);               // крепление крышки
+                translate([0, sp_y + cable_y]) circle(d = 8);                                // провода динамика
+                translate([-(W/2 - wall - 1), sp_y + W/2]) square([W - 2*wall - 2, Ht - W - 3]);  // окно к выводам микрофона
+                for (sx = [-1, 1]) translate([sx*11 - 0.8, sp_y + 7]) square([1.6, 4.5]);    // прорези под стяжку усилителя
             }
-        // крепёжные отверстия панели к стойке
-        for (x = [8, nx*pitch + 2*margin - 8], y = [8, ny*pitch + 2*margin - 8])
+        for (x = [8, nx*pitch_x + 2*margin - 8], y = [8, ny*pitch_y + 2*margin - 8])
             translate([x, y]) circle(d = 5.5);
     }
 }
 
 module array(nx, ny) {
     for (i = [0:nx-1], j = [0:ny-1])
-        translate([(i - (nx-1)/2)*pitch, (j - (ny-1)/2)*pitch, 0]) element();
+        translate([(i - (nx-1)/2)*pitch_x, (j - (ny-1)/2)*pitch_y, 0]) element();
 }
 
 if (part == "holder")        holder();
-else if (part == "back")     rotate([180, 0, 0]) back();   // наружной стороной на стол
-else if (part == "micboard") micboard();
+else if (part == "back")     rotate([180, 0, 0]) back();
 else if (part == "assembly") element(0);
-else if (part == "exploded") element(14);
+else if (part == "exploded") element(12);
 else if (part == "array_line")   array(16, 1);
 else if (part == "array_planar") array(8, 4);
 else if (part == "panel_line")   panel(16, 1);
