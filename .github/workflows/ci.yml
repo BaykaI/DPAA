@@ -1,0 +1,57 @@
+# Проверки проекта: модель и RTL (Python + Icarus Verilog), C#-пульт, прошивка ESP32.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  python:
+    name: Модель, RTL, ядро прошивки ESP32 (pytest)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Зависимости
+        run: |
+          sudo apt-get update && sudo apt-get install -y iverilog
+          pip install -r requirements.txt playwright
+          python -m playwright install --with-deps chromium
+      - run: python -m pytest -q
+
+  dotnet:
+    name: Пульт на C# (dotnet test)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - run: dotnet test software/DpaaControl
+
+  esp32:
+    name: Прошивка ESP32-S3 (PlatformIO)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('firmware/esp32/platformio.ini') }}
+      - run: pip install platformio
+      - run: pio run -d firmware/esp32
+      - name: Проверка, что страница в прошивке не устарела
+        run: git diff --exit-code firmware/esp32/src/web_page.h
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dpaa-esp32-firmware
+          path: |
+            firmware/esp32/.pio/build/esp32-s3-devkitc-1/firmware.bin
+            firmware/esp32/.pio/build/esp32-s3-devkitc-1/bootloader.bin
+            firmware/esp32/.pio/build/esp32-s3-devkitc-1/partitions.bin

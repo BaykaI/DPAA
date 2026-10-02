@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Акустическая ЦАФАР</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#eef1f5;--card:#fff;--line:#d5dbe3;--text:#1d1d1f;--muted:#5b6270;--b0:#1f63b0;--b1:#c0392b;--ok:#2e8b57;--off:#c5cad3}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0;flex:1}
+.pill{padding:4px 10px;border-radius:999px;font-size:14px;background:#eef1f5;color:var(--muted);white-space:nowrap}
+.pill.ok{background:#e3f3ea;color:var(--ok)}.pill.bad{background:#fbe9e7;color:var(--b1)}.pill.run{background:#fbe9e7;color:var(--b1);font-weight:600}
+button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;cursor:pointer;color:var(--text)}
+button.on{background:var(--b0);border-color:var(--b0);color:#fff}
+#gear{padding:8px 12px;font-size:20px}
+main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:14px;padding:14px}
+@media (max-width:820px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+#hall{width:100%;aspect-ratio:4/3;display:block;touch-action:none;border-radius:10px;background:#f7f9fc}
+.hint{color:var(--muted);font-size:14px;margin:8px 2px 0}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.modes button{padding:14px 6px;font-size:17px}
+.go{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.go button{padding:18px;font-size:20px;font-weight:700;color:#fff;border:0}
+#start{background:var(--ok)}#stop{background:var(--b1)}
+h2{font-size:16px;margin:14px 0 6px}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:10px 4px}
+label{display:block;margin:10px 0 2px;font-size:15px}
+input[type=range]{width:100%;height:34px}
+.about{font-size:14px;color:var(--muted);margin-top:10px}
+#banner{display:none;margin:0 14px;padding:10px 14px;border-radius:12px;background:#fff7e0;border:1px solid #f0d58a}
+#err{display:none;margin:10px 0 0;color:var(--b1);font-weight:600}
+#service{display:none;grid-column:1/-1}
+#service .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.els{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}.els button{padding:8px 0}
+select,input[type=text],input[type=number]{font:inherit;padding:8px;border:1px solid var(--line);border-radius:10px;width:100%}
+#peaks{width:100%;height:160px;display:block}
+</style>
+</head>
+<body>
+<header>
+  <h1>Акустическая ЦАФАР</h1>
+  <span id="st-fpga" class="pill">ПЛИС: …</span>
+  <span id="st-run" class="pill">тишина</span>
+  <button id="gear" title="Служебные настройки">⚙</button>
+</header>
+<div id="banner">Автопилот показывает возможности решётки. Коснитесь любой кнопки — и управляйте сами.</div>
+<main>
+  <section class="card">
+    <canvas id="hall" width="800" height="600"></canvas>
+    <p class="hint" id="hint"></p>
+  </section>
+  <section class="card">
+    <div class="modes">
+      <button data-mode="beam">Луч</button>
+      <button data-mode="sweep">Маятник</button>
+      <button data-mode="two">Два луча</button>
+      <button data-mode="focus">Прожектор</button>
+      <button data-mode="listen">Слушать</button>
+      <button data-mode="elements">По одному</button>
+    </div>
+    <div class="go"><button id="start">▶ Пуск</button><button id="stop">■ Тишина</button></div>
+    <p id="err"></p>
+    <div id="sound">
+      <h2>Звук</h2>
+      <div class="seg" id="src"><button data-v="0">Тон</button><button data-v="1">Шум</button><button data-v="2">Чирп</button></div>
+      <label id="tone-l">Высота тона: <b id="tone-v"></b></label>
+      <input id="tone" type="range" min="500" max="6000" step="50">
+    </div>
+    <label>Громкость: <b id="amp-v"></b></label>
+    <input id="amp" type="range" min="0" max="0.3" step="0.01">
+    <p class="about" id="about"></p>
+  </section>
+
+  <section class="card" id="service">
+    <div class="grid">
+      <div>
+        <h2>Амплитудное распределение</h2>
+        <select id="taper"><option value="0">равномерное</option><option value="1">Тейлор</option>
+          <option value="2">Чебышёв</option><option value="3">Ханн</option></select>
+        <label>Боковые лепестки: <b id="sll-v"></b></label>
+        <input id="sll" type="range" min="20" max="50" step="1">
+        <label>Элементы (синий — включён):</label>
+        <div class="els" id="els"></div>
+        <div class="seg" style="margin-top:6px"><button id="all-on">Все</button><button id="every2">Через один</button></div>
+        <label><input type="checkbox" id="cw"> свои веса (16 чисел через запятую)</label>
+        <input type="text" id="w" placeholder="1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1">
+      </div>
+      <div>
+        <h2>Маятник и приём</h2>
+        <label>Маятник от <b id="sf-v"></b> до <b id="st-v"></b>, период <b id="sp-v"></b></label>
+        <input id="sf" type="range" min="-80" max="0" step="5"><input id="st" type="range" min="0" max="80" step="5">
+        <input id="sp" type="range" min="2" max="20" step="1">
+        <label>Два луча: тон луча 1 <b id="t1-v"></b>, сигнал луча 2</label>
+        <input id="t1" type="range" min="500" max="5000" step="50">
+        <div class="seg" id="s2"><button data-v="0">Тон</button><button data-v="1">Шум</button><button data-v="2">Чирп</button></div>
+        <label>По одному: тон <b id="et-v"></b>, на элемент <b id="dw-v"></b></label>
+        <input id="et" type="range" min="500" max="5000" step="50"><input id="dw" type="range" min="0.2" max="3" step="0.1">
+      </div>
+      <div>
+        <h2>Экспонат</h2>
+        <label>Потолок громкости для посетителей: <b id="maxamp-v"></b></label>
+        <input id="maxamp" type="range" min="0" max="0.5" step="0.01">
+        <label><input type="checkbox" id="demo"> автопилот, если экспонатом не пользуются</label>
+        <label>Через, с: <input type="number" id="idle" min="10" max="3600" step="10"></label>
+        <h2>Уровни микрофонов, дБПШ</h2>
+        <canvas id="peaks" width="560" height="160"></canvas>
+        <p class="hint" id="frames"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const N = 16, PITCH = 0.04, C = 343, FS = 50e6 / 1024;
+const XS = Array.from({length: N}, (_, i) => (i - (N - 1) / 2) * PITCH);
+const ABOUT = {
+  beam: "Все 16 динамиков играют одно и то же, но с крошечными задержками — звук складывается только в одном направлении. Ведите пальцем по залу, чтобы повернуть луч.",
+  sweep: "Луч сам обходит зал, как антенна радиолокатора. Встаньте в стороне и услышите, как звук «проходит» мимо вас.",
+  two: "Два луча одновременно, у каждого свой сигнал: слева тон, справа щелчки. Перетаскивайте их пальцем.",
+  focus: "Решётка собирает звук в точку — как линза собирает свет. Коснитесь места в зале, куда направить «прожектор».",
+  listen: "Решётка слушает: наденьте наушники. Левое ухо слышит одно направление, правое — другое. Попросите друга говорить с разных сторон.",
+  elements: "Проверка: элементы звучат по очереди. Один элемент излучает во все стороны — сравните с узким лучом.",
+};
+const HINT = {beam: "Ведите пальцем — луч поворачивается", sweep: "Луч качается сам", two: "Перетаскивайте синий и красный лучи",
+  focus: "Коснитесь точки — туда сфокусируется звук", listen: "Синий — левое ухо, красный — правое", elements: "Элементы звучат по очереди"};
+
+let S = null;                 // последнее состояние от ESP32
+let ui = {mode: "beam"};      // то, что пользователь уже поменял (важнее ответа сервера)
+let pending = {}, timer = null, editing = null, editUntil = 0;
+
+// ---------------------------------------------------------------- обмен с ESP32
+function send(params, now) {
+  Object.assign(pending, params);
+  if (now) flush(); else if (!timer) timer = setTimeout(flush, 60);
+}
+async function flush() {
+  clearTimeout(timer); timer = null;
+  const p = Object.assign({mode: ui.mode}, pending); pending = {};
+  const qs = Object.entries(p).map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+  try { apply(await (await fetch("/api/set?" + qs)).json()); } catch (e) { offline(); }
+}
+async function poll() {
+  try { apply(await (await fetch("/api/state")).json()); } catch (e) { offline(); }
+  setTimeout(poll, S && S.run && (S.mode === "sweep" || S.mode === "demo" || S.mode === "elements") ? 120 : 400);
+}
+function offline() { $("st-fpga").textContent = "нет связи с пультом"; $("st-fpga").className = "pill bad"; }
+
+// ---------------------------------------------------------------- состояние -> экран
+function apply(s) {
+  S = s;
+  if (s.mode !== "demo" && !timer && Object.keys(pending).length === 0) ui.mode = s.mode;
+  $("st-fpga").textContent = s.fpga ? "ПЛИС: связь есть" : "ПЛИС: нет связи";
+  $("st-fpga").className = "pill " + (s.fpga ? "ok" : "bad");
+  $("st-run").textContent = s.mode === "demo" ? "автопилот" : s.run ? (s.mode === "listen" ? "● приём" : "● звучит") : "тишина";
+  $("st-run").className = "pill" + (s.run ? " run" : "");
+  $("banner").style.display = s.mode === "demo" ? "block" : "none";
+  $("err").style.display = s.err ? "block" : "none"; $("err").textContent = s.err;
+  document.querySelectorAll(".modes button").forEach(b => b.classList.toggle("on", b.dataset.mode === ui.mode));
+  seg("src", s.src); seg("s2", s.s2);
+  $("sound").style.display = ["beam", "sweep", "focus"].includes(ui.mode) ? "" : "none";
+  $("tone-l").style.display = $("tone").style.display = s.src === 0 ? "" : "none";
+  $("amp").max = s.maxamp;
+  for (const id of ["tone", "amp", "sll", "sf", "st", "sp", "t1", "et", "dw", "maxamp"]) setRange(id, s[id]);
+  if (editing !== "idle") $("idle").value = s.idle;
+  $("taper").value = s.taper; $("demo").checked = s.demo; $("cw").checked = s.cw;
+  if (editing !== "w" && !$("w").value && s.cw) $("w").value = s.w.join(",");
+  $("about").textContent = ABOUT[ui.mode]; $("hint").textContent = HINT[ui.mode];
+  document.querySelectorAll("#els button").forEach((b, i) => b.classList.toggle("on", !(s.off >> i & 1)));
+  $("frames").textContent = s.fpga ? "кадров I2S: " + s.frames.toLocaleString("ru") + ", зонд: " + s.peaks[16] + " дБПШ" : "";
+  labels(); drawHall(); drawPeaks();
+}
+function setRange(id, v) {
+  if (v === undefined || (editing === id && Date.now() < editUntil)) return;
+  $(id).value = v;
+}
+function seg(id, v) { document.querySelectorAll("#" + id + " button").forEach(b => b.classList.toggle("on", +b.dataset.v === v)); }
+function labels() {
+  const v = id => +$(id).value;
+  $("tone-v").textContent = v("tone") + " Гц"; $("amp-v").textContent = Math.round(v("amp") * 100) + " %";
+  $("sll-v").textContent = "−" + v("sll") + " дБ"; $("sf-v").textContent = v("sf") + "°"; $("st-v").textContent = v("st") + "°";
+  $("sp-v").textContent = v("sp") + " с"; $("t1-v").textContent = v("t1") + " Гц"; $("et-v").textContent = v("et") + " Гц";
+  $("dw-v").textContent = v("dw") + " с"; $("maxamp-v").textContent = Math.round(v("maxamp") * 100) + " %";
+}
+
+// ---------------------------------------------------------------- диаграмма направленности (как в ПЛИС)
+function pattern(azDeg, gains, freq, focus) {
+  // задержки квантуются до 1/32 отсчёта, как в регистрах ПЛИС
+  const tau = XS.map(x => focus ? -Math.hypot(x - focus[0], focus[1]) / C : x * Math.sin(azDeg * Math.PI / 180) / C);
+  const mn = Math.min(...tau);
+  const tq = tau.map(t => Math.round(((t - mn) * FS + 4) * 32) / 32 / FS);
+  const norm = gains.reduce((a, g) => a + Math.abs(g), 0) || 1, w = 2 * Math.PI * freq, k = w / C, out = [];
+  for (let a = -90; a <= 90; a += 1) {
+    const u = a * Math.PI / 180; let re = 0, im = 0;
+    for (let n = 0; n < N; n++) {
+      let ph, amp = gains[n];
+      if (focus) {
+        const r = Math.hypot(focus[0], focus[1]), d = Math.hypot(r * Math.sin(u) - XS[n], r * Math.cos(u));
+        ph = -w * tq[n] - k * d; amp *= r / d;
+      } else ph = -w * tq[n] + k * XS[n] * Math.sin(u);
+      re += amp * Math.cos(ph); im += amp * Math.sin(ph);
+    }
+    out.push(Math.max(-30, 20 * Math.log10(Math.hypot(re, im) / norm + 1e-9)));
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- план зала
+const hall = $("hall"), H = hall.getContext("2d");
+const W = {x0: -2, x1: 2, y0: -0.3, y1: 2.7};
+function toPx(x, y) {
+  const s = hall.width / (W.x1 - W.x0);
+  return [(x - W.x0) * s, hall.height - (y - W.y0) * s];
+}
+function toWorld(px, py) {
+  const s = hall.width / (W.x1 - W.x0);
+  return [px / s + W.x0, (hall.height - py) / s + W.y0];
+}
+function lobe(db, color) {
+  H.beginPath(); H.moveTo(...toPx(0, 0));
+  db.forEach((v, i) => { const u = (i - 90) * Math.PI / 180, r = 2.5 * Math.pow(10, v / 20); H.lineTo(...toPx(r * Math.sin(u), r * Math.cos(u))); });
+  H.closePath(); H.fillStyle = color + "33"; H.fill(); H.strokeStyle = color; H.lineWidth = 2.5; H.stroke();
+}
+function handle(azDeg, color, r = 2.3) {
+  const u = azDeg * Math.PI / 180, [px, py] = toPx(r * Math.sin(u), r * Math.cos(u));
+  H.beginPath(); H.arc(px, py, 16, 0, 2 * Math.PI); H.fillStyle = color; H.fill();
+  H.fillStyle = "#fff"; H.font = "bold 15px system-ui"; H.textAlign = "center"; H.textBaseline = "middle";
+  H.fillText(Math.round(azDeg) + "°", px, py);
+}
+function drawHall() {
+  if (!S) return;
+  H.clearRect(0, 0, hall.width, hall.height);
+  H.strokeStyle = "#e3e7ed"; H.lineWidth = 1;
+  for (let r = 0.5; r <= 2.5; r += 0.5) { H.beginPath(); const [cx, cy] = toPx(0, 0); H.arc(cx, cy, r * hall.width / 4, Math.PI, 2 * Math.PI); H.stroke(); }
+  for (let a = -60; a <= 60; a += 30) { H.beginPath(); H.moveTo(...toPx(0, 0)); const u = a * Math.PI / 180; H.lineTo(...toPx(2.6 * Math.sin(u), 2.6 * Math.cos(u))); H.stroke(); }
+  H.fillStyle = "#5b6270"; H.font = "14px system-ui"; H.textAlign = "left";
+  for (let r = 1; r <= 2; r++) H.fillText(r + " м", ...toPx(0.05, r + 0.03));
+  const m = S.mode === "demo" ? S.demo_mode : ui.mode, g = S.gw, f = S.src === 0 ? S.tone : 3000;
+  if (m === "two") { lobe(pattern(S.az2, g, S.s2 === 0 ? S.t2 : 3000), "#c0392b"); lobe(pattern(S.az1, g, S.t1), "#1f63b0"); }
+  else if (m === "listen") { lobe(pattern(S.right, g, 3000), "#c0392b"); lobe(pattern(S.left, g, 3000), "#1f63b0"); }
+  else if (m === "focus") {
+    const fx = S.mode === "demo" ? S.cur : S.fx, fy = S.mode === "demo" ? 1 : S.fy;
+    lobe(pattern(0, g, f, [fx, fy]), "#1f63b0");
+    const [px, py] = toPx(fx, fy); H.strokeStyle = "#1f63b0"; H.lineWidth = 3;
+    H.beginPath(); H.arc(px, py, 14, 0, 2 * Math.PI); H.moveTo(px - 22, py); H.lineTo(px + 22, py); H.moveTo(px, py - 22); H.lineTo(px, py + 22); H.stroke();
+  } else if (m === "elements") lobe(pattern(0, g.some(v => v) ? g : g.map((_, i) => i === 0 ? 1 : 0), S.et), "#2e8b57");
+  else lobe(pattern(m === "sweep" ? S.cur : S.az, g, f), "#1f63b0");
+  if (S.mode !== "demo") {
+    if (m === "beam") handle(S.az, "#1f63b0");
+    if (m === "two") { handle(S.az1, "#1f63b0"); handle(S.az2, "#c0392b"); }
+    if (m === "listen") { handle(S.left, "#1f63b0"); handle(S.right, "#c0392b"); }
+  }
+  // решётка
+  for (let n = 0; n < N; n++) {
+    const [px, py] = toPx(XS[n], 0), on = !(S.off >> n & 1), act = S.mode === "elements" && S.el === n;
+    H.fillStyle = act ? "#2e8b57" : on ? "#1d1d1f" : "#c5cad3"; H.fillRect(px - 3, py - 2, 6, 16);
+  }
+}
+let drag = null;
+function pick(ev) {
+  const r = hall.getBoundingClientRect();
+  const [x, y] = toWorld((ev.clientX - r.left) * hall.width / r.width, (ev.clientY - r.top) * hall.height / r.height);
+  return {x, y, az: Math.max(-80, Math.min(80, Math.round(Math.atan2(x, Math.max(y, 0.01)) * 180 / Math.PI)))};
+}
+hall.addEventListener("pointerdown", ev => {
+  if (!S) return;
+  hall.setPointerCapture(ev.pointerId);
+  const p = pick(ev), m = ui.mode;
+  if (m === "two") drag = Math.abs(p.az - S.az1) <= Math.abs(p.az - S.az2) ? "az1" : "az2";
+  else if (m === "listen") drag = Math.abs(p.az - S.left) <= Math.abs(p.az - S.right) ? "left" : "right";
+  else if (m === "beam") drag = "az";
+  else if (m === "focus") drag = "focus";
+  else drag = null;
+  move(p);
+});
+hall.addEventListener("pointermove", ev => { if (drag) move(pick(ev)); });
+hall.addEventListener("pointerup", () => { drag = null; flush(); });
+function move(p) {
+  if (!drag) return;
+  if (drag === "focus") { const fx = Math.round(p.x * 100) / 100, fy = Math.max(0.3, Math.round(p.y * 100) / 100); S.fx = fx; S.fy = fy; send({fx, fy}); }
+  else { S[drag] = p.az; send({[drag]: p.az}); }
+  drawHall();
+}
+
+// ---------------------------------------------------------------- уровни микрофонов
+function drawPeaks() {
+  const c = $("peaks"), g = c.getContext("2d"), w = c.width / 17;
+  g.clearRect(0, 0, c.width, c.height);
+  S.peaks.forEach((db, i) => {
+    const h = Math.max(0, (db + 90) / 90) * (c.height - 18);
+    g.fillStyle = i === 16 ? "#2e8b57" : "#c0392b"; g.fillRect(i * w + 3, c.height - 16 - h, w - 6, h);
+    g.fillStyle = "#5b6270"; g.font = "11px system-ui"; g.textAlign = "center";
+    g.fillText(i === 16 ? "зонд" : i + 1, i * w + w / 2, c.height - 3);
+  });
+}
+
+// ---------------------------------------------------------------- органы управления
+document.querySelectorAll(".modes button").forEach(b => b.onclick = () => { ui.mode = b.dataset.mode; send({run: 1}, true); });
+$("start").onclick = () => send({run: 1}, true);
+$("stop").onclick = async () => { pending = {}; try { apply(await (await fetch("/api/stop")).json()); } catch (e) { offline(); } };
+document.querySelectorAll("#src button").forEach(b => b.onclick = () => send({src: b.dataset.v}, true));
+document.querySelectorAll("#s2 button").forEach(b => b.onclick = () => send({s2: b.dataset.v}, true));
+for (const id of ["tone", "amp", "sll", "sf", "st", "sp", "t1", "et", "dw", "maxamp"]) {
+  $(id).addEventListener("input", () => { editing = id; editUntil = Date.now() + 800; labels(); send({[id]: $(id).value}); });
+}
+$("taper").onchange = () => send({taper: $("taper").value}, true);
+$("demo").onchange = () => send({demo: $("demo").checked ? 1 : 0}, true);
+$("idle").onchange = () => send({idle: $("idle").value}, true);
+$("cw").onchange = () => send({cw: $("cw").checked ? 1 : 0, w: $("w").value}, true);
+$("w").addEventListener("focus", () => editing = "w");
+$("w").addEventListener("change", () => { editing = null; send({w: $("w").value, cw: 1}, true); });
+for (let i = 0; i < N; i++) {
+  const b = document.createElement("button"); b.textContent = i + 1;
+  b.onclick = () => send({off: (S ? S.off : 0) ^ (1 << i)}, true);
+  $("els").appendChild(b);
+}
+$("all-on").onclick = () => send({off: 0}, true);
+$("every2").onclick = () => send({off: 0xAAAA}, true);
+$("gear").onclick = () => { const s = $("service"); s.style.display = s.style.display === "block" ? "none" : "block"; };
+poll();
+</script>
+</body>
+</html>
