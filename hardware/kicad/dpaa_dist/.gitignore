@@ -1,0 +1,7 @@
+*.kicad_prl
+*-backups/
+fsch.lck
+*.lck
+__pycache__/
+gen/build.log
+fab/gerber/

@@ -1,0 +1,1262 @@
+[
+ [
+  "H1",
+  "M3",
+  "MountingHole:MountingHole_3.2mm_M3",
+  "отверстие M3"
+ ],
+ [
+  "H2",
+  "M3",
+  "MountingHole:MountingHole_3.2mm_M3",
+  "отверстие M3"
+ ],
+ [
+  "H3",
+  "M3",
+  "MountingHole:MountingHole_3.2mm_M3",
+  "отверстие M3"
+ ],
+ [
+  "H4",
+  "M3",
+  "MountingHole:MountingHole_3.2mm_M3",
+  "отверстие M3"
+ ],
+ [
+  "J1",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R11",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R12",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R13",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R14",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R15",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R16",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R17",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J2",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R21",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R22",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R23",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R24",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R25",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R26",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R27",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J3",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R31",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R32",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R33",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R34",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R35",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R36",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R37",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J4",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R41",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R42",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R43",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R44",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R45",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R46",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R47",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J5",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R51",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R52",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R53",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R54",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R55",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R56",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R57",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J6",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R61",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R62",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R63",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R64",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R65",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R66",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R67",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J7",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R71",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R72",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R73",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R74",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R75",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R76",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R77",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J8",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R81",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R82",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R83",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R84",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R85",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R86",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R87",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J9",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R91",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R92",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R93",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R94",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R95",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R96",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R97",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J10",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R101",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R102",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R103",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R104",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R105",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R106",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R107",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J11",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R111",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R112",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R113",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R114",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R115",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R116",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R117",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J12",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R121",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R122",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R123",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R124",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R125",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R126",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R127",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J13",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R131",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R132",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R133",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R134",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R135",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R136",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R137",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J14",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R141",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R142",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R143",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R144",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R145",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R146",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R147",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J15",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R151",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R152",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R153",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R154",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R155",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R156",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R157",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J16",
+  "2x6",
+  "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical",
+  "гребёнка 2x6 элемента"
+ ],
+ [
+  "R161",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R162",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R163",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R164",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R165",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R166",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R167",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "U1",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C1",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U3",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C3",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U5",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C5",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U7",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C7",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U9",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C9",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U11",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C11",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U2",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C2",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U4",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C4",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U6",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C6",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U8",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C8",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U10",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C10",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U12",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C12",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "J20",
+  "IDC 2x15",
+  "Connector_IDC:IDC-Header_2x15_P2.54mm_Vertical",
+  "вилка IDC 2x15 с ключом"
+ ],
+ [
+  "J21",
+  "IDC 2x15",
+  "Connector_IDC:IDC-Header_2x15_P2.54mm_Vertical",
+  "вилка IDC 2x15 с ключом"
+ ],
+ [
+  "U13",
+  "74LVC244A",
+  "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm",
+  "буфер 8 каналов, SOIC-20W"
+ ],
+ [
+  "C13",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "R201",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R202",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R203",
+  "33",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R204",
+  "100k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "U31",
+  "PCM5102A",
+  "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm",
+  "ЦАП I2S, TSSOP-20"
+ ],
+ [
+  "C31",
+  "2u2",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "C32",
+  "2u2",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "C33",
+  "2u2",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "C34",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "C35",
+  "10u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "C36",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "C37",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "U32",
+  "TDA1308",
+  "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+  "драйвер наушников, SO-8"
+ ],
+ [
+  "C41",
+  "1u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "C42",
+  "1u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "R43",
+  "10k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R44",
+  "10k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R41",
+  "10k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R42",
+  "10k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "C43",
+  "10u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "C46",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "C44",
+  "220u",
+  "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+  "электролит 220 мкФ 6,3 В"
+ ],
+ [
+  "C45",
+  "220u",
+  "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+  "электролит 220 мкФ 6,3 В"
+ ],
+ [
+  "J26",
+  "3.5mm",
+  "Connector_Audio:Jack_3.5mm_CUI_SJ1-3523N_Horizontal",
+  "гнездо 3,5 мм стерео"
+ ],
+ [
+  "J27",
+  "3.5mm",
+  "Connector_Audio:Jack_3.5mm_CUI_SJ1-3523N_Horizontal",
+  "гнездо 3,5 мм стерео"
+ ],
+ [
+  "J18",
+  "5.5/2.1",
+  "Connector_BarrelJack:BarrelJack_Horizontal",
+  "гнездо питания 5,5/2,1"
+ ],
+ [
+  "Q1",
+  "AO4407A",
+  "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+  "P-MOSFET, защита от переполюсовки"
+ ],
+ [
+  "D1",
+  "SMBJ5.0A",
+  "Diode_SMD:D_SMB",
+  "TVS 5 В, SMB"
+ ],
+ [
+  "C10",
+  "1000u",
+  "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm",
+  "электролит 1000 мкФ 10 В"
+ ],
+ [
+  "C11",
+  "10u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "F1",
+  "PTC 1.5A",
+  "Fuse:Fuse_1812_4532Metric",
+  "самовосстанавливающийся предохранитель 1812"
+ ],
+ [
+  "F2",
+  "PTC 1.5A",
+  "Fuse:Fuse_1812_4532Metric",
+  "самовосстанавливающийся предохранитель 1812"
+ ],
+ [
+  "F3",
+  "PTC 1.5A",
+  "Fuse:Fuse_1812_4532Metric",
+  "самовосстанавливающийся предохранитель 1812"
+ ],
+ [
+  "F4",
+  "PTC 1.5A",
+  "Fuse:Fuse_1812_4532Metric",
+  "самовосстанавливающийся предохранитель 1812"
+ ],
+ [
+  "U20",
+  "AP2112K-3.3",
+  "Package_TO_SOT_SMD:SOT-23-5",
+  "LDO 3,3 В 600 мА"
+ ],
+ [
+  "C21",
+  "1u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "C22",
+  "1u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "FB1",
+  "600R",
+  "Inductor_SMD:L_0805_2012Metric",
+  "феррит 0805 600 Ом"
+ ],
+ [
+  "U21",
+  "AP2112K-3.3",
+  "Package_TO_SOT_SMD:SOT-23-5",
+  "LDO 3,3 В 600 мА (микрофоны)"
+ ],
+ [
+  "C23",
+  "1u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "C24",
+  "1u",
+  "Capacitor_SMD:C_0805_2012Metric",
+  "конденсатор 0805"
+ ],
+ [
+  "LED1",
+  "LED",
+  "LED_SMD:LED_0603_1608Metric",
+  "светодиод 0603"
+ ],
+ [
+  "R207",
+  "1k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "LED2",
+  "LED",
+  "LED_SMD:LED_0603_1608Metric",
+  "светодиод 0603"
+ ],
+ [
+  "R208",
+  "1k",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "J17",
+  "RJ45",
+  "Connector_RJ:RJ45_Amphenol_54602-x08_Horizontal",
+  "RJ45 зонда"
+ ],
+ [
+  "J25",
+  "ESP32",
+  "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+  "гребёнка 1x3 к ESP32"
+ ],
+ [
+  "R205",
+  "100",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "R206",
+  "100",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "SW1",
+  "кнопка",
+  "Button_Switch_SMD:SW_Push_1TS009xxxx-xxxx-xxxx_6x6x5mm",
+  "кнопка тактовая 6x6"
+ ]
+]

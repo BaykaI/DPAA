@@ -1,0 +1,486 @@
+# -*- coding: utf-8 -*-
+"""Распределительная плата DPAA: компоновка (place.py) + трассировка (router.py) + полигоны земли + скос углов.
+Запуск: "C:\\Program Files\\KiCad\\10.0\\bin\\python.exe" -I make_board.py"""
+import os, sys, math, time
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import pcbnew
+from pcbnew import VECTOR2I, FromMM as mm
+import place
+from place import board, net, P, F, B, W, H
+from router import Grid, Router, G
+
+OUT = os.path.join(HERE, "..", "dpaa_dist.kicad_pcb")
+TRK, PWR, PWR2 = 0.25, 0.5, 1.0
+VIA_D, VIA_DRL = 0.6, 0.3
+
+place.build()
+
+# ---------------------------------------------------------------- сетка и препятствия
+grid = Grid(W, H)
+netid = {}
+def nid(name):
+    if name not in netid:
+        netid[name] = len(netid) + 1
+    return netid[name]
+
+terms = {}          # имя цепи -> список (ix, iy, L|None)
+stubs = []          # ручные отрезки: (x1,y1,x2,y2,layer,netname)
+
+def pad_rect(pad):
+    bb = pad.GetBoundingBox()
+    return bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6
+
+def pad_layers(pad):
+    ls = []
+    if pad.IsOnLayer(F):
+        ls.append(0)
+    if pad.IsOnLayer(B):
+        ls.append(1)
+    return ls
+
+NOROUTE = set()           # земля тоже трассируется (деревом, последней) и дополнительно заливается полигонами
+pads_by_net = {}
+for fp in board.GetFootprints():
+    fx, fy = fp.GetPosition().x / 1e6, fp.GetPosition().y / 1e6
+    for pad in fp.Pads():
+        nm = pad.GetNetname()
+        x1, y1, x2, y2 = pad_rect(pad)
+        ls = pad_layers(pad)
+        if not ls:                      # NPTH
+            grid.block_rect(x1, y1, x2, y2, (0, 1), -1, clr=0.45, via_clr=0.6)
+            continue
+        own = nid(nm) if nm and nm not in NOROUTE else -1
+        grid.block_rect(x1, y1, x2, y2, ls, own)
+        if nm and nm not in NOROUTE:
+            pads_by_net.setdefault(nm, []).append((pad, fp, (x1, y1, x2, y2), ls))
+
+def cells_in_rect(x1, y1, x2, y2, shrink=0.05):
+    out = []
+    ix1, ix2 = int(math.ceil((x1 + shrink) / G)), int(math.floor((x2 - shrink) / G))
+    iy1, iy2 = int(math.ceil((y1 + shrink) / G)), int(math.floor((y2 - shrink) / G))
+    for ix in range(ix1, ix2 + 1):
+        for iy in range(iy1, iy2 + 1):
+            out.append((ix, iy))
+    return out
+
+# терминалы: ячейка внутри площадки; иначе — отвод наружу от корпуса до узла сетки
+escape_n = 0
+used_cells = set()
+for nm, lst in pads_by_net.items():
+    tl = []
+    for pad, fp, (x1, y1, x2, y2), ls in lst:
+        L = None if len(ls) == 2 else ls[0]
+        cells = cells_in_rect(x1, y1, x2, y2)
+        if cells:
+            cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+            cells.sort(key=lambda c: (c[0] * G - cx) ** 2 + (c[1] * G - cy) ** 2)
+            tl.append((cells[0][0], cells[0][1], L))
+            continue
+        # отвод: от центра площадки наружу (от центра корпуса) вдоль длинной стороны площадки,
+        # длина — три уровня по номеру вывода, затем малый поперечный сдвиг до узла сетки
+        px, py = pad.GetPosition().x / 1e6, pad.GetPosition().y / 1e6
+        fx, fy = fp.GetPosition().x / 1e6, fp.GetPosition().y / 1e6
+        num = int(pad.GetNumber()) if pad.GetNumber().isdigit() else 0
+        ext = 0.9 + 1.0 * (num % 3)
+        if (x2 - x1) >= (y2 - y1):
+            dx = 1 if px > fx else -1
+            ex = px + dx * ((x2 - x1) / 2 + ext)
+            ix = int(round(ex / G))
+            if (ix * G - ex) * dx < 0:
+                ix += dx
+            iy = int(round(py / G))
+        else:
+            dy = 1 if py > fy else -1
+            ey = py + dy * ((y2 - y1) / 2 + ext)
+            iy = int(round(ey / G))
+            if (iy * G - ey) * dy < 0:
+                iy += dy
+            ix = int(round(px / G))
+        pts = [(px, py), (ix * G, iy * G)]          # прямой (чуть наклонный) отвод до узла сетки
+        key = (ix, iy, ls[0])
+        assert key not in used_cells, ("совпали узлы отводов", fp.GetReference(), pad.GetNumber())
+        used_cells.add(key)
+        for (ax, ay), (bx, by) in zip(pts, pts[1:]):
+            stubs.append((ax, ay, bx, by, ls[0], nm))
+            grid.block_rect(min(ax, bx), min(ay, by), max(ax, bx), max(ay, by), (ls[0],), nid(nm), clr=0.45, via_clr=0.6)
+        tl.append((ix, iy, ls[0]))
+        escape_n += 1
+    terms[nm] = tl
+
+print("цепей", len(terms), "отводов", escape_n)
+
+# ---------------------------------------------------------------- порядок и ширины
+WIDE2 = set()
+WIDE1 = {"VIN", "+5V", "5V_A", "5V_B", "5V_C", "5V_D", "3V3L", "3V3_MIC", "5V_MIC"}
+def width_of(nm):
+    return TRK                      # все дорожки трассировщика 0,25; силовые шины проложены вручную (1,0 мм)
+
+def order_key(nm):
+    t = terms[nm]
+    if nm in WIDE2:
+        return (0, -len(t))
+    if nm in WIDE1:
+        return (1, -len(t))
+    if nm in ("BCLK", "LRCLK"):
+        return (2, -len(t))
+    if nm == "GND":
+        return (9, 0)
+    # короткие локальные цепи раньше, затем длинные (BCLK/LRCLK последними)
+    xs = [a for a, b, _ in t]; ys = [b for a, b, _ in t]
+    span = (max(xs) - min(xs)) + (max(ys) - min(ys))
+    return (3, span)
+
+names = sorted(terms, key=order_key)
+from router import column_penalty
+from place import RES_XL, RES_XR, gu
+BAN = 10 ** 6
+# колонки резисторов: со стороны гребёнки — весь коридор (только горизонтали), со стороны буферов — 2 ячейки
+column_penalty(grid, 0, 0, (0,), BAN, 3.0, 134.0, xa=RES_XL - 2.6, xb=RES_XL + 3.9)
+column_penalty(grid, 0, 0, (0,), BAN, 3.0, 134.0, xa=RES_XR - 3.9, xb=RES_XR + 2.6)
+# колонки выводов SOIC-20W: площадки и коридор снаружи от них, только в полосе выводов каждого корпуса
+def chip_bans(cx, cy):
+    column_penalty(grid, 0, 0, (0,), BAN, cy - 6.6, cy + 6.6, xa=cx - 4.6 - 1.6, xb=cx - 4.6 + 0.7)
+    column_penalty(grid, 0, 0, (0,), BAN, cy - 6.6, cy + 6.6, xa=cx + 4.6 - 0.7, xb=cx + 4.6 + 1.6)
+for k in range(7):
+    for cx in (gu(49), gu(107)):
+        chip_bans(cx, place.HDR_Y0 + (k + 0.5) * place.HDR_DY)
+chip_bans(gu(78), gu(96))
+# колонки переходных в коридорах: по нижнему слою только поперёк (выходы переходных вверх/вниз остаются свободны)
+for vx in (RES_XL - 3 * G, RES_XL + 3 * G, RES_XL + 5 * G, RES_XR - 5 * G, RES_XR - 3 * G, RES_XR + 3 * G, gu(58), gu(98)):
+    column_penalty(grid, vx, 0.1, (1,), BAN, 3.0, 134.0)
+for dx in (-2.9, 2.9):                                    # U31 TSSOP: отводы идут горизонтально
+    column_penalty(grid, gu(78) + dx, 2.2, (0,), BAN, 85.0, 93.0)
+for ix in (gu(64), gu(64) + 2.54, gu(88), gu(88) + 2.54):   # колонки IDC
+    column_penalty(grid, ix, 0.7, (0, 1))
+for nm, tl in terms.items():
+    for ix, iy, L in tl:
+        for LL in ((0, 1) if L is None else (L,)):
+            i = grid.idx(ix, iy)
+            if grid.occ[LL][i] == 0:
+                grid.occ[LL][i] = nid(nm)
+def add_track(x1, y1, x2, y2, L, nm, w):
+    if abs(x1 - x2) < 1e-6 and abs(y1 - y2) < 1e-6:
+        return
+    t = pcbnew.PCB_TRACK(board); t.SetStart(P(x1, y1)); t.SetEnd(P(x2, y2)); t.SetWidth(mm(w))
+    t.SetLayer(F if L == 0 else B); t.SetNet(net(nm)); board.Add(t)
+
+rt = Router(grid)
+
+PRE = {}            # имя цепи -> ячейки предварительно проложенных шин
+def pre(points, nm, L, w):
+    """Шина вручную: дорожки в плату + занятие ячеек сетки (с запасом под ширину)."""
+    lay = 0 if L == "F" else 1
+    cells = set()
+    for (x1, y1), (x2, y2) in zip(points, points[1:]):
+        add_track(x1, y1, x2, y2, lay, nm, w)
+        grid.block_rect(min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2), (lay,), nid(nm), clr=w / 2 + 0.33, via_clr=w / 2 + 0.6, fat_clr=w / 2 + 0.75)
+        for ix, iy in cells_in_rect(min(x1, x2) - w / 2, min(y1, y2) - w / 2, max(x1, x2) + w / 2, max(y1, y2) + w / 2, 0.0):
+            if 0 <= ix < grid.nx and 0 <= iy < grid.ny:
+                cells.add((ix, iy, lay)); grid.occ[lay][grid.idx(ix, iy)] = nid(nm)
+    PRE.setdefault(nm, set()).update(cells)
+
+def pre_via(x, y, nm):
+    v = pcbnew.PCB_VIA(board); v.SetPosition(P(x, y)); v.SetWidth(mm(VIA_D)); v.SetDrill(mm(VIA_DRL))
+    v.SetLayerPair(F, B); v.SetNet(net(nm)); board.Add(v)
+    grid.block_rect(x - 0.35, y - 0.35, x + 0.35, y + 0.35, (0, 1), nid(nm), clr=0.33, via_clr=0.7)
+    ix, iy = grid.cell(x, y)
+    for L in (0, 1):
+        grid.occ[L][grid.idx(ix, iy)] = nid(nm); PRE.setdefault(nm, set()).add((ix, iy, L))
+
+def padxy(ref, num):
+    return place.padpos(board.FindFootprintByReference(ref), num)
+
+# шина +5V вдоль нижнего края (1,0 мм), от F2 до F4; исток Q1 — к шине
+YB = 145.65
+fuse_pads = {}
+for ref in ("F1", "F2", "F3", "F4"):
+    fp = board.FindFootprintByReference(ref)
+    ps = sorted(fp.Pads(), key=lambda q: q.GetPosition().y)
+    fuse_pads[ref] = [(q.GetPosition().x / 1e6, q.GetPosition().y / 1e6) for q in ps]
+pre([fuse_pads["F2"][1], (97.79, YB), (97.79, fuse_pads["F4"][1][1]), fuse_pads["F4"][1]], "+5V", "F", PWR2)
+pre([fuse_pads["F3"][1], (97.79, fuse_pads["F3"][1][1]), (97.79, YB)], "+5V", "F", PWR2)
+q1 = padxy("Q1", 2)
+pre([q1, (q1[0], YB)], "+5V", "F", PWR2)
+for ref in ("C10", "D1", "C11"):                      # накопитель, TVS, керамика — к шине +5V широкой дорожкой
+    fp = board.FindFootprintByReference(ref)
+    for q in fp.Pads():
+        if q.GetNetname() == "+5V":
+            x, y = q.GetPosition().x / 1e6, q.GetPosition().y / 1e6
+            pre([(x, y), (x, YB)], "+5V", "F", PWR2)
+# VIN: гнездо J18 -> сток Q1 (1,0 мм)
+j18 = padxy("J18", 1); q7 = padxy("Q1", 7)
+pre([j18, (80.0, j18[1]), (80.0, q7[1]), q7], "VIN", "F", PWR2)
+# 5V_A: F1 -> верхний слой x = 2,54 до J1; 5V_B: F2 -> переходное -> нижний слой x = 1,905 до J5
+pre([fuse_pads["F1"][0], (fuse_pads["F1"][0][0], 139.9), (2.54, 139.9), (2.54, place.HDR_Y0), padxy("J1", 1)], "5V_A", "F", PWR2)
+pre_via(fuse_pads["F2"][0][0], fuse_pads["F2"][0][1], "5V_B")
+pre([fuse_pads["F2"][0], (1.905, fuse_pads["F2"][0][1]), (1.905, place.HDR_Y0 + 4 * place.HDR_DY)], "5V_B", "B", PWR2)
+# 5V_C: F3 -> верхний слой x = 97,79 до J9; 5V_D: F4 -> переходное -> нижний слой x = 98,42 до J13
+pre([fuse_pads["F3"][0], (97.79, fuse_pads["F3"][0][1]), (97.79, place.HDR_Y0), padxy("J9", 1)], "5V_C", "F", PWR2)
+pre_via(fuse_pads["F4"][0][0], fuse_pads["F4"][0][1], "5V_D")
+pre([fuse_pads["F4"][0], (98.42, fuse_pads["F4"][0][1]), (98.42, place.HDR_Y0 + 4 * place.HDR_DY)], "5V_D", "B", PWR2)
+VIA_TERMS = {}      # имя цепи -> список терминалов-переходных (обе стороны)
+CORR_VIAS = []      # (x, y, nm, via, stub_track)
+def pre_via2(x, y, nm):
+    """переходное коридора: ячейка — за цепью, соседние ячейки доступны дорожкам"""
+    v = pcbnew.PCB_VIA(board); v.SetPosition(P(x, y)); v.SetWidth(mm(VIA_D)); v.SetDrill(mm(VIA_DRL))
+    v.SetLayerPair(F, B); v.SetNet(net(nm)); board.Add(v)
+    ix, iy = grid.cell(x, y)
+    for L in (0, 1):
+        grid.occ[L][grid.idx(ix, iy)] = nid(nm)
+    for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
+        jx, jy = ix + dx, iy + dy
+        if 0 <= jx < grid.nx and 0 <= jy < grid.ny:
+            grid.via_ok[grid.idx(jx, jy)] = False
+    for dy in (-1, 1):                     # выходы переходного вверх/вниз по нижнему слою — за цепью
+        j = grid.idx(ix, iy + dy)
+        if grid.occ[1][j] == 0:
+            grid.occ[1][j] = nid(nm)
+    VIA_TERMS.setdefault(nm, []).append((ix, iy, None))
+    return v
+
+def corridor_vias():
+    n = 0
+    for fp in board.GetFootprints():
+        ref = fp.GetReference(); fx = fp.GetPosition().x / 1e6
+        is_res = ref.startswith("R") and ref[1:].isdigit() and int(ref[1:]) < 200 and min(abs(fx - RES_XL), abs(fx - RES_XR)) < 0.1
+        is_buf = fp.GetValue() == "74LVC244A" and ref != "U13"
+        if not (is_res or is_buf):
+            continue
+        left = fx < W / 2
+        for q in fp.Pads():
+            nm = q.GetNetname()
+            if not nm:
+                continue
+            px, py = q.GetPosition().x / 1e6, q.GetPosition().y / 1e6
+            if is_res:
+                chip_side = (px > fx) if left else (px < fx)
+                if chip_side:
+                    vx = RES_XL + 3 * G if left else RES_XR - 3 * G
+                elif nm.startswith("MIC") and "_" not in nm:          # MIC<n> к шлейфу — через нижний слой
+                    vx = RES_XL - 3 * G if left else RES_XR + 3 * G
+                else:
+                    continue
+            else:
+                corridor_side = (px < fx) if left else (px > fx)
+                if corridor_side:
+                    vx = RES_XL + 5 * G if left else RES_XR - 5 * G
+                else:                                                # выводы со стороны центра — переходное у края корпуса
+                    vx = gu(58) if left else gu(98)
+            iy = int(round(py / G)); vy = iy * G
+            # отвод от площадки к переходному (не в PRE: это отдельный островок цепи)
+            t = pcbnew.PCB_TRACK(board); t.SetStart(P(px, py)); t.SetEnd(P(vx, vy)); t.SetWidth(mm(TRK)); t.SetLayer(F); t.SetNet(net(nm)); board.Add(t)
+            grid.block_rect(min(px, vx), min(py, vy), max(px, vx), max(py, vy), (0,), nid(nm), clr=0.33, via_clr=0.5)
+            v = pre_via2(vx, vy, nm); n += 1
+            CORR_VIAS.append((vx, vy, nm, v, t))
+            # терминал площадки заменить терминалом переходного
+            x1, y1, x2, y2 = pad_rect(q)
+            cells = cells_in_rect(x1, y1, x2, y2)
+            if cells:
+                cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+                cells.sort(key=lambda c: (c[0] * G - cx) ** 2 + (c[1] * G - cy) ** 2)
+                tcell = (cells[0][0], cells[0][1], 0)
+                if tcell in terms.get(nm, []):
+                    terms[nm].remove(tcell)
+    for nm, lst in VIA_TERMS.items():
+        terms.setdefault(nm, []).extend(lst)
+    print("переходных в коридорах", n)
+corridor_vias()
+
+# 3V3_MIC: по низу — верхний слой y = 138,9 (нижний слой под ним свободен для пересечений), вверх вдоль краёв — нижний слой
+Y3 = 138.9
+pre([(3.81, Y3), (96.52, Y3)], "3V3_MIC", "F", PWR)
+pre_via(3.81, Y3, "3V3_MIC"); pre_via(96.52, Y3, "3V3_MIC")
+pre([(3.81, Y3), (3.175, Y3), (3.175, place.HDR_Y0 - 2.54), padxy("J1", 2)], "3V3_MIC", "B", PWR)
+pre([(96.52, Y3), (96.52, place.HDR_Y0 + 2.54), padxy("J9", 2)], "3V3_MIC", "B", PWR)
+t0 = time.time()
+rt.freeze_base()
+id2name = {v: k for k, v in netid.items()}
+def route_one(nm, maxexp=1500000):
+    pre_cells = PRE.get(nm, set())
+    tl = [t for t in terms[nm] if (t[0], t[1], 0) not in pre_cells and (t[0], t[1], 1) not in pre_cells] or terms[nm][:1]
+    cx = sum(a for a, b, _ in tl) / len(tl); cy = sum(b for a, b, _ in tl) / len(tl)
+    tl = sorted(tl, key=lambda t: (t[0] - cx) ** 2 + (t[1] - cy) ** 2)
+    for ix, iy, L in tl:
+        for LL in ((0, 1) if L is None else (L,)):
+            i = grid.idx(ix, iy)
+            if grid.occ[LL][i] in (0, nid(nm)):
+                grid.occ[LL][i] = nid(nm)
+    return rt.route_net(nid(nm), tl, width=width_of(nm), maxexp=maxexp, preset=PRE.get(nm, ()))
+
+queue = [n for n in names if n != 'GND']      # земля — после всех перекладок
+failed_final = []
+iters = 0
+ripped_count = {}
+while queue and iters < 1400:
+    nm = queue.pop(0); iters += 1
+    rt.ripup(nid(nm))
+    if route_one(nm):
+        continue
+    # перекладка: снять мешающие цепи вокруг неудачных терминалов, проложить заново, снятые — в конец очереди
+    fails = [f for f in rt.fail if f[0] == nid(nm)]
+    blk = set()
+    for f in fails:
+        blk |= rt.blockers(f[1], r=3)
+    blk.discard(nid(nm))
+    blk = [b for b in blk if ripped_count.get(b, 0) < 14 and len(terms[id2name[b]]) <= 10]
+    if not blk:
+        failed_final.append(nm); continue
+    for b in blk:
+        rt.ripup(b); ripped_count[b] = ripped_count.get(b, 0) + 1
+    rt.ripup(nid(nm))
+    ok = route_one(nm)
+    for b in blk:
+        if id2name[b] not in queue:
+            queue.append(id2name[b])
+    if not ok:
+        queue.append(nm) if ripped_count.get(nid(nm), 0) < 14 else failed_final.append(nm)
+        ripped_count[nid(nm)] = ripped_count.get(nid(nm), 0) + 1
+# остаток очереди (если упёрлись в предел итераций) — проложить без перекладки
+for nm in queue:
+    rt.ripup(nid(nm)); route_one(nm)
+# финальные проходы: все неудачные цепи пробуем ещё раз (к концу пути часто освобождаются)
+for _pass in range(4):
+    redo = sorted({id2name[nd] for nd, t, _ in rt.fail} | set(failed_final))
+    if not redo:
+        break
+    failed_final = []
+    for nm in redo:
+        rt.ripup(nid(nm))
+        if not route_one(nm, maxexp=3000000):
+            failed_final.append(nm)
+    print("финальный проход %d: осталось %d" % (_pass + 1, len(failed_final)))
+# земля: деревом по остаткам свободного места (остальное доберут полигоны и сшивающие переходные)
+rt.ripup(nid("GND"))
+gnd_ok = route_one("GND", maxexp=3000000)
+print("земля: проложена полностью" if gnd_ok else "земля: часть площадок — только через полигоны")
+bad = sorted({id2name[nd] for nd, t, _ in rt.fail if id2name[nd] != "GND"} | set(failed_final))
+print("трассировка %.0f с, итераций %d, не удалось: %d %s" % (time.time() - t0, iters, len(bad), bad[:20]))
+
+# ---------------------------------------------------------------- уборка неиспользованных переходных коридора
+ends_b = set(); ends_f = set()
+for (x1, y1, x2, y2, L, nd, w) in rt.tracks:
+    for (x, y) in ((x1, y1), (x2, y2)):
+        (ends_b if L == 1 else ends_f).add((round(x, 2), round(y, 2)))
+n_rm = 0
+for (vx, vy, nm, v, t) in CORR_VIAS:
+    k = (round(vx, 2), round(vy, 2))
+    if k not in ends_b:
+        board.Remove(v); n_rm += 1
+        if k not in ends_f:
+            board.Remove(t)
+print("убрано лишних переходных", n_rm)
+
+# ---------------------------------------------------------------- перенос в плату
+for (x1, y1, x2, y2, L, nd, w) in rt.tracks:
+    add_track(x1, y1, x2, y2, L, id2name[nd], w)
+for (x, y, nd) in rt.vias:
+    v = pcbnew.PCB_VIA(board); v.SetPosition(P(x, y)); v.SetWidth(mm(VIA_D)); v.SetDrill(mm(VIA_DRL))
+    v.SetLayerPair(F, B); v.SetNet(net(id2name[nd])); board.Add(v)
+for (x1, y1, x2, y2, L, nm) in stubs:
+    add_track(x1, y1, x2, y2, L, nm, TRK)
+
+# ---------------------------------------------------------------- сшивающие переходные земли
+nst = 0
+for ix in range(4, grid.nx - 4, 12):
+    for iy in range(4, grid.ny - 4, 12):
+        i = grid.idx(ix, iy)
+        if grid.via_ok[i] and grid.occ[0][i] == 0 and grid.occ[1][i] == 0:
+            ok = True
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    j = grid.idx(ix + dx, iy + dy)
+                    if grid.occ[0][j] not in (0,) or grid.occ[1][j] not in (0,):
+                        ok = False
+            if ok:
+                v = pcbnew.PCB_VIA(board); v.SetPosition(P(ix * G, iy * G)); v.SetWidth(mm(VIA_D)); v.SetDrill(mm(VIA_DRL))
+                v.SetLayerPair(F, B); v.SetNet(net("GND")); board.Add(v); nst += 1
+print("сшивающих переходных", nst)
+
+# ---------------------------------------------------------------- полигоны земли
+def zone(points, netname, layer):
+    z = pcbnew.ZONE(board); z.SetLayer(layer); z.SetNet(net(netname)); z.Outline().NewOutline()
+    for (x, y) in points:
+        z.Outline().Append(mm(x), mm(y))
+    z.SetLocalClearance(mm(0.25)); z.SetMinThickness(mm(0.25)); z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)
+    z.SetThermalReliefGap(mm(0.3)); z.SetThermalReliefSpokeWidth(mm(0.5)); z.SetZoneName(netname + ("_F" if layer == F else "_B"))
+    try:
+        z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
+    except Exception:
+        pass
+    board.Add(z)
+for L in (F, B):
+    zone([(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)], "GND", L)
+for fp in board.GetFootprints():
+    if fp.GetAttributes() & pcbnew.FP_THROUGH_HOLE:
+        fp.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+
+# ---------------------------------------------------------------- скос прямых углов (45°)
+def merge_collinear():
+    """объединить последовательные коллинеарные отрезки одной цепи/слоя (после трассировщика их нет, но после скоса — проверка)."""
+    pass
+
+def miter_corners(cmax=0.3, cmax_pwr=0.45):
+    def key(v):
+        return (round(v.x / 1e6, 2), round(v.y / 1e6, 2))
+    vias = {key(t.GetPosition()) for t in board.GetTracks() if t.GetClass() == "PCB_VIA"}
+    pads = set()
+    for fp in board.GetFootprints():
+        for pd in fp.Pads():
+            pads.add(key(pd.GetPosition()))
+    segs = [t for t in board.GetTracks() if t.GetClass() == "PCB_TRACK"]
+    ends = {}
+    for t in segs:
+        for e in (0, 1):
+            ends.setdefault((key(t.GetStart() if e == 0 else t.GetEnd()), t.GetLayer()), []).append((t, e))
+    n_done = 0
+    for (k, layer), lst in list(ends.items()):
+        if len(lst) != 2 or k in vias or k in pads:
+            continue
+        (t1, e1), (t2, e2) = lst
+        if t1.GetNetCode() != t2.GetNetCode():
+            continue
+        def far(t, e):
+            return t.GetEnd() if e == 0 else t.GetStart()
+        c0 = t1.GetStart() if e1 == 0 else t1.GetEnd()
+        a, b = far(t1, e1), far(t2, e2)
+        d1 = (a.x - c0.x, a.y - c0.y); d2 = (b.x - c0.x, b.y - c0.y)
+        L1, L2 = math.hypot(*d1), math.hypot(*d2)
+        if L1 < 1 or L2 < 1:
+            continue
+        cosang = (d1[0] * d2[0] + d1[1] * d2[1]) / (L1 * L2)
+        if abs(cosang) > 0.05:
+            continue
+        w = min(t1.GetWidth(), t2.GetWidth())
+        c = min(mm(cmax_pwr if w >= mm(0.45) else cmax), L1 / 2, L2 / 2)
+        p1 = VECTOR2I(int(c0.x + d1[0] / L1 * c), int(c0.y + d1[1] / L1 * c))
+        p2 = VECTOR2I(int(c0.x + d2[0] / L2 * c), int(c0.y + d2[1] / L2 * c))
+        if e1 == 0:
+            t1.SetStart(p1)
+        else:
+            t1.SetEnd(p1)
+        if e2 == 0:
+            t2.SetStart(p2)
+        else:
+            t2.SetEnd(p2)
+        d = pcbnew.PCB_TRACK(board); d.SetStart(p1); d.SetEnd(p2); d.SetWidth(w); d.SetLayer(t1.GetLayer())
+        d.SetNetCode(t1.GetNetCode()); board.Add(d); n_done += 1
+    return n_done
+
+print("скошено углов", miter_corners())
+board.SetFileName(os.path.abspath(OUT))
+pcbnew.SaveBoard(os.path.abspath(OUT), board)
+open(os.path.join(HERE, "route_log.txt"), "w", encoding="utf-8").write(
+    "цепей %d, не удалось %d: %s\nдорожек %d, переходных %d\n" % (len(terms), len(bad), bad, len(rt.tracks), len(rt.vias)))
+# BOM для схемы и фабрики
+import json
+json.dump(place.PARTS, open(os.path.join(HERE, "parts.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+print("saved", OUT)
+
+import pickle
+pickle.dump({"occ": grid.occ, "via_ok": grid.via_ok, "vcost": grid.vcost, "nx": grid.nx, "ny": grid.ny, "id2": id2name,
+             "fail": rt.fail}, open(os.path.join(HERE, "grid_state.pkl"), "wb"))
+# отладка неудач
+id2 = id2name
+for nd, (ix, iy, L), why in rt.fail:
+    print("FAIL", id2[nd], why, "cell", round(ix * G, 2), round(iy * G, 2), "L", L)

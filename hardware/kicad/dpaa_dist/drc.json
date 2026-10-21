@@ -1,0 +1,115 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-21T20:05:51",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Solder mask aperture bridges items with different nets",
+            "key": "solder_mask_bridge"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Missing footprint",
+            "key": "missing_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "key": "extra_footprint"
+        },
+        {
+            "description": "Footprint attributes don't match symbol",
+            "key": "footprint_symbol_mismatch"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Pad net doesn't match schematic",
+            "key": "net_conflict"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "key": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "key": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "key": "silk_edge_clearance"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "key": "pth_inside_courtyard"
+        },
+        {
+            "description": "NPTH inside courtyard",
+            "key": "npth_inside_courtyard"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        },
+        {
+            "description": "Footprint not found in libraries",
+            "key": "lib_footprint_issues"
+        },
+        {
+            "description": "Footprint doesn't match copy in library",
+            "key": "lib_footprint_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "10.0.4",
+    "schematic_parity": [],
+    "source": "dpaa_dist.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Дорожка [5V_B] на B.Cu, длина 59,7750 mm",
+                    "pos": {
+                        "x": 1.905,
+                        "y": 141.055
+                    },
+                    "uuid": "b2faa3f9-943d-4fa1-995e-702eadad867c"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        },
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Дорожка [5V_D] на B.Cu, длина 65,3575 mm",
+                    "pos": {
+                        "x": 98.42,
+                        "y": 146.6375
+                    },
+                    "uuid": "e65b5341-d46f-4974-9b6b-a01b17245812"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        }
+    ]
+}
