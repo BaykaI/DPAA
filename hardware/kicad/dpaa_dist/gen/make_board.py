@@ -467,7 +467,37 @@ def miter_corners(cmax=0.3, cmax_pwr=0.45):
         d.SetNetCode(t1.GetNetCode()); board.Add(d); n_done += 1
     return n_done
 
-print("скошено углов", miter_corners())
+n_miter = miter_corners()
+# оставшиеся прямые стыки двух дорожек (без via/площадки) — в журнал
+def right_angles_left():
+    def key(v):
+        return (round(v.x / 1e6, 2), round(v.y / 1e6, 2))
+    vias = {key(t.GetPosition()) for t in board.GetTracks() if t.GetClass() == "PCB_VIA"}
+    pads = set()
+    for fp in board.GetFootprints():
+        for pd in fp.Pads():
+            pads.add(key(pd.GetPosition()))
+    ends = {}
+    for t in board.GetTracks():
+        if t.GetClass() == "PCB_TRACK":
+            for e in (0, 1):
+                ends.setdefault((key(t.GetStart() if e == 0 else t.GetEnd()), t.GetLayer()), []).append((t, e))
+    out = []
+    for (k, layer), lst in ends.items():
+        if len(lst) != 2 or k in vias or k in pads:
+            continue
+        (t1, e1), (t2, e2) = lst
+        c0 = t1.GetStart() if e1 == 0 else t1.GetEnd()
+        a = t1.GetEnd() if e1 == 0 else t1.GetStart(); b = t2.GetEnd() if e2 == 0 else t2.GetStart()
+        d1 = (a.x - c0.x, a.y - c0.y); d2 = (b.x - c0.x, b.y - c0.y)
+        L1, L2 = math.hypot(*d1), math.hypot(*d2)
+        if L1 and L2 and abs((d1[0] * d2[0] + d1[1] * d2[1]) / (L1 * L2)) < 0.05:
+            out.append(k)
+    return out
+left = right_angles_left()
+open(os.path.join(HERE, "miter_log.txt"), "w", encoding="utf-8").write(
+    "скошено углов: %d" % n_miter + chr(10) + "осталось прямых стыков двух дорожек: %d" % len(left) + chr(10) + chr(10).join("%.2f %.2f" % k for k in left) + chr(10))
+print("скошено углов", n_miter, "осталось прямых", len(left))
 board.SetFileName(os.path.abspath(OUT))
 pcbnew.SaveBoard(os.path.abspath(OUT), board)
 open(os.path.join(HERE, "route_log.txt"), "w", encoding="utf-8").write(

@@ -238,7 +238,7 @@ def power():
     r0603("R207", gu(90), gu(215), "LED1", "+5V", 0, "1k")
     place("LED_SMD", "LED_0603_1608Metric", "LED2", gu(96), gu(215), 0, "LED", {1: "GND", 2: "LED2"}, "светодиод 0603")
     r0603("R208", gu(102), gu(215), "LED2", "3V3L", 0, "1k")
-    text("5V", gu(84), gu(212), size=0.8, thick=0.12); text("3V3", gu(96), gu(212), size=0.8, thick=0.12)
+    text("5V", gu(84), gu(212), size=1.0, thick=0.15); text("3V3", gu(96), gu(212), size=1.0, thick=0.15)
 
 def misc():
     # J17 — RJ45 зонда у нижнего края слева; J25 — ESP32; SW1 — кнопка «тест»
@@ -251,7 +251,7 @@ def misc():
     r0603("R206", gu(76), gu(119), "ESP_RX", "ESP_RX_J", 0, "100")
     place("Button_Switch_SMD", "SW_Push_1TS009xxxx-xxxx-xxxx_6x6x5mm", "SW1", gu(88), gu(122), 0, "кнопка",
           {1: "BTN_TEST", 2: "3V3L"}, "кнопка тактовая 6x6")
-    text("TEST", gu(88), gu(130), size=0.8)
+    text("TEST", gu(88), gu(130), size=1.0)
     text("ESP32 TX RX GND", gu(66) - 3.0, gu(120), size=0.8, thick=0.12, rot=90)
     text("DPAA dist. board v1  2026-10", gu(78), gu(224), size=1.2)
-    text("ЗОНД RJ45", gu(22) + 6, gu(226), size=0.8)
+    text("ЗОНД RJ45", gu(22) + 6, gu(226), size=1.0)
