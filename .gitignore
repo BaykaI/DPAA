@@ -9,3 +9,4 @@ software/**/obj/
 software/**/.vs/
 *.user
 firmware/esp32/.pio/
+venv/

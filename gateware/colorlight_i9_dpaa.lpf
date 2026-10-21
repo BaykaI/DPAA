@@ -1,99 +1,98 @@
-# Ограничения DPAA для Colorlight i9 v7.2 (LFE5U-45F-6BG381) + плата расширения.
-# SITE "???" заменить на выводы ПЛИС по распиновке платы расширения (PMOD P1..P6)
-# и модуля i9 (генератор 25 МГц, светодиод). Пока остаётся хоть один "???",
-# make BOARD=i9 откажется собирать битстрим — это защита от неверной распиновки.
-# Раскладка по PMOD (контакты 1–4, 7–10) — docs/hardware/wiring.md:
-# P1 — BCLK, LRCLK, MON_SD, BTN_TEST, ESP_TX, ESP_RX, USB_TX, USB_RX;
-# P2, P3 — TXD0..15; P4, P5 — MIC0..15 (rxd[0..15]); P6 — CAL (rxd[16]) + резерв.
+# Ограничения DPAA для Colorlight i9 v7.2 (LFE5U-45F-6BG381) + плата расширения MuseLab (i5-i9-extboard).
+# Выводы взяты из схемы платы расширения (i5-i9-extboard.pdf) и сверены с картинкой распиновки i9 v7.2;
+# таблица «гребёнка → шарик» — i9_extboard_pins.json, раскладка — docs/hardware/pinout.md.
+# Гребёнки P2/P3/P5/P6 — 2×15 (не PMOD!): контакты 1–15 один ряд, 16–30 другой; 1/10/21/30 = 3V3, 2/8/11/20/29 = GND, 23 = 5V.
+# P2 — TXD0..15, BCLK, LRCLK, MON_SD;  P3 — MIC0..15, CAL, BTN_TEST, ESP_RX, ESP_TX;
+# P5 контакты 15/16 — UART отладчика DAPLink (COM-порт по USB-C), контакты 13/14/17/18 заняты SPI микроконтроллера — не использовать.
 
-LOCATE COMP "clk25" SITE "???";      # генератор 25 МГц на модуле i9
+LOCATE COMP "clk25" SITE "P3";          # генератор 25 МГц модуля i9
 IOBUF PORT "clk25" IO_TYPE=LVCMOS33;
 FREQUENCY PORT "clk25" 25 MHZ;
-LOCATE COMP "led" SITE "???";        # светодиод модуля
+LOCATE COMP "led" SITE "L2";            # светодиод D2 модуля (= P2 контакт 28)
 IOBUF PORT "led" IO_TYPE=LVCMOS33;
 
-LOCATE COMP "bclk" SITE "???";
+LOCATE COMP "bclk" SITE "P17";          # P2 контакт 25
 IOBUF PORT "bclk" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "lrclk" SITE "???";
+LOCATE COMP "lrclk" SITE "R18";         # P2 контакт 26
 IOBUF PORT "lrclk" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "mon_sd" SITE "???";
+LOCATE COMP "mon_sd" SITE "C18";        # P2 контакт 27
 IOBUF PORT "mon_sd" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
 
-LOCATE COMP "txd[0]" SITE "???";
+LOCATE COMP "txd[0]" SITE "K18";        # P2 контакт 3 — усилитель 1
 IOBUF PORT "txd[0]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[1]" SITE "???";
+LOCATE COMP "txd[1]" SITE "T18";        # P2 контакт 4 — усилитель 2
 IOBUF PORT "txd[1]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[2]" SITE "???";
+LOCATE COMP "txd[2]" SITE "R17";        # P2 контакт 5 — усилитель 3
 IOBUF PORT "txd[2]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[3]" SITE "???";
+LOCATE COMP "txd[3]" SITE "M17";        # P2 контакт 6 — усилитель 4
 IOBUF PORT "txd[3]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[4]" SITE "???";
+LOCATE COMP "txd[4]" SITE "U18";        # P2 контакт 7 — усилитель 5
 IOBUF PORT "txd[4]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[5]" SITE "???";
+LOCATE COMP "txd[5]" SITE "P18";        # P2 контакт 9 — усилитель 6
 IOBUF PORT "txd[5]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[6]" SITE "???";
+LOCATE COMP "txd[6]" SITE "N18";        # P2 контакт 12 — усилитель 7
 IOBUF PORT "txd[6]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[7]" SITE "???";
+LOCATE COMP "txd[7]" SITE "L20";        # P2 контакт 13 — усилитель 8
 IOBUF PORT "txd[7]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[8]" SITE "???";
+LOCATE COMP "txd[8]" SITE "K20";        # P2 контакт 14 — усилитель 9
 IOBUF PORT "txd[8]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[9]" SITE "???";
+LOCATE COMP "txd[9]" SITE "G20";        # P2 контакт 15 — усилитель 10
 IOBUF PORT "txd[9]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[10]" SITE "???";
+LOCATE COMP "txd[10]" SITE "J20";       # P2 контакт 16 — усилитель 11
 IOBUF PORT "txd[10]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[11]" SITE "???";
+LOCATE COMP "txd[11]" SITE "L18";       # P2 контакт 17 — усилитель 12
 IOBUF PORT "txd[11]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[12]" SITE "???";
+LOCATE COMP "txd[12]" SITE "M18";       # P2 контакт 18 — усилитель 13
 IOBUF PORT "txd[12]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[13]" SITE "???";
+LOCATE COMP "txd[13]" SITE "N17";       # P2 контакт 19 — усилитель 14
 IOBUF PORT "txd[13]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[14]" SITE "???";
+LOCATE COMP "txd[14]" SITE "U17";       # P2 контакт 22 — усилитель 15
 IOBUF PORT "txd[14]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "txd[15]" SITE "???";
+LOCATE COMP "txd[15]" SITE "T17";       # P2 контакт 24 — усилитель 16
 IOBUF PORT "txd[15]" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
 
-LOCATE COMP "rxd[0]" SITE "???";
+LOCATE COMP "rxd[0]" SITE "D20";        # P3 контакт 3 — микрофон 1
 IOBUF PORT "rxd[0]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[1]" SITE "???";
+LOCATE COMP "rxd[1]" SITE "B19";        # P3 контакт 4 — микрофон 2
 IOBUF PORT "rxd[1]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[2]" SITE "???";
+LOCATE COMP "rxd[2]" SITE "A19";        # P3 контакт 5 — микрофон 3
 IOBUF PORT "rxd[2]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[3]" SITE "???";
+LOCATE COMP "rxd[3]" SITE "A18";        # P3 контакт 6 — микрофон 4
 IOBUF PORT "rxd[3]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[4]" SITE "???";
+LOCATE COMP "rxd[4]" SITE "C4";         # P3 контакт 7 — микрофон 5
 IOBUF PORT "rxd[4]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[5]" SITE "???";
+LOCATE COMP "rxd[5]" SITE "C3";         # P3 контакт 9 — микрофон 6
 IOBUF PORT "rxd[5]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[6]" SITE "???";
+LOCATE COMP "rxd[6]" SITE "A3";         # P3 контакт 12 — микрофон 7
 IOBUF PORT "rxd[6]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[7]" SITE "???";
+LOCATE COMP "rxd[7]" SITE "B1";         # P3 контакт 13 — микрофон 8
 IOBUF PORT "rxd[7]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[8]" SITE "???";
+LOCATE COMP "rxd[8]" SITE "D2";         # P3 контакт 14 — микрофон 9
 IOBUF PORT "rxd[8]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[9]" SITE "???";
+LOCATE COMP "rxd[9]" SITE "E2";         # P3 контакт 15 — микрофон 10
 IOBUF PORT "rxd[9]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[10]" SITE "???";
+LOCATE COMP "rxd[10]" SITE "D1";        # P3 контакт 16 — микрофон 11
 IOBUF PORT "rxd[10]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[11]" SITE "???";
+LOCATE COMP "rxd[11]" SITE "C1";        # P3 контакт 17 — микрофон 12
 IOBUF PORT "rxd[11]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[12]" SITE "???";
+LOCATE COMP "rxd[12]" SITE "C2";        # P3 контакт 18 — микрофон 13
 IOBUF PORT "rxd[12]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[13]" SITE "???";
+LOCATE COMP "rxd[13]" SITE "E3";        # P3 контакт 19 — микрофон 14
 IOBUF PORT "rxd[13]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[14]" SITE "???";
+LOCATE COMP "rxd[14]" SITE "B4";        # P3 контакт 22 — микрофон 15
 IOBUF PORT "rxd[14]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[15]" SITE "???";
+LOCATE COMP "rxd[15]" SITE "D3";        # P3 контакт 24 — микрофон 16
 IOBUF PORT "rxd[15]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "rxd[16]" SITE "???";
+LOCATE COMP "rxd[16]" SITE "C17";       # P3 контакт 25 — калибровочный зонд
 IOBUF PORT "rxd[16]" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
 
-LOCATE COMP "esp_tx" SITE "???";
+LOCATE COMP "esp_tx" SITE "F20";        # P3 контакт 28 — к RX ESP32-S3
 IOBUF PORT "esp_tx" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "esp_rx" SITE "???";
+LOCATE COMP "esp_rx" SITE "B20";        # P3 контакт 27 — от TX ESP32-S3
 IOBUF PORT "esp_rx" IO_TYPE=LVCMOS33 PULLMODE=UP;
-LOCATE COMP "usb_tx" SITE "???";
+LOCATE COMP "usb_tx" SITE "J17";        # P5 контакт 16 — UART2_RX микроконтроллера DAPLink (ПЛИС → ноутбук)
 IOBUF PORT "usb_tx" IO_TYPE=LVCMOS33 DRIVE=8 SLEWRATE=SLOW;
-LOCATE COMP "usb_rx" SITE "???";
+LOCATE COMP "usb_rx" SITE "H18";        # P5 контакт 15 — UART2_TX микроконтроллера DAPLink (ноутбук → ПЛИС)
 IOBUF PORT "usb_rx" IO_TYPE=LVCMOS33 PULLMODE=UP;
-LOCATE COMP "btn_test" SITE "???";
+LOCATE COMP "btn_test" SITE "B18";      # P3 контакт 26 — кнопка SW1 (активная 1)
 IOBUF PORT "btn_test" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
