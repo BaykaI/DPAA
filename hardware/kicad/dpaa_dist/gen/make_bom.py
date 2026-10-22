@@ -25,6 +25,10 @@ PARTNO = {
  ("RJ45", "RJ45"): ("гнездо RJ45 8P8C без магнетиков (Amphenol 54602-908 или аналог)", "C86580"),
  ("5.5/2.1", "BarrelJack"): ("гнездо DC 5,5/2,1 мм (DC-005)", "C16214"),
  ("3.5mm", "Jack_3.5mm"): ("гнездо 3,5 мм стерео, угловое (SJ1-3523N / PJ-320)", "C145816"),
+ ("RB1-125B8G1A", "RJ45_UDE"): ("RJ45 MagJack 1000BASE-T UDE RB1-125B8G1A", "C363353"),
+ ("1n 2kV", "C_1812"): ("конденсатор 1812 1 нФ 2 кВ X7R", "C135917"),
+ ("1M", "R_0603"): ("резистор 0603 1 МОм 1%", ""),
+ ("0R DNP", "R_0603"): ("резистор 0603 0 Ом — НЕ УСТАНАВЛИВАТЬ (DNP)", ""),
 }
 def partno(value, fpname):
     for (v, f), (name, lcsc) in PARTNO.items():
@@ -42,7 +46,7 @@ rows = []
 grp = collections.OrderedDict()
 for fp in board.GetFootprints():
     ref = fp.GetReference()
-    if ref.startswith("H"):
+    if ref.startswith("H") or fp.IsDNP():
         continue
     fpname = fp.GetFPID().GetLibItemName().wx_str() if hasattr(fp.GetFPID().GetLibItemName(), "wx_str") else str(fp.GetFPID().GetLibItemName())
     val = fp.GetValue()

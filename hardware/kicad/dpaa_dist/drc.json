@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-21T20:08:21",
+    "date": "2026-10-22T18:14:54",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -85,12 +85,12 @@
             "description": "Track has unconnected end",
             "items": [
                 {
-                    "description": "Дорожка [5V_B] на B.Cu, длина 59,7750 mm",
+                    "description": "Дорожка [5V_D] на B.Cu, длина 85,6775 mm",
                     "pos": {
-                        "x": 1.905,
-                        "y": 141.055
+                        "x": 98.42,
+                        "y": 166.9575
                     },
-                    "uuid": "4aae6212-ec85-467d-ab48-117ed17878d8"
+                    "uuid": "fa5870b7-0e5c-472a-9285-b58242ea4bd5"
                 }
             ],
             "severity": "warning",
@@ -100,16 +100,46 @@
             "description": "Track has unconnected end",
             "items": [
                 {
-                    "description": "Дорожка [5V_D] на B.Cu, длина 65,3575 mm",
+                    "description": "Дорожка [5V_B] на B.Cu, длина 80,0950 mm",
                     "pos": {
-                        "x": 98.42,
-                        "y": 146.6375
+                        "x": 1.905,
+                        "y": 161.375
                     },
-                    "uuid": "dc3ee8f9-b033-49d9-b996-fa34be786412"
+                    "uuid": "1563f665-61c2-4006-952c-b654bce2fecb"
                 }
             ],
             "severity": "warning",
             "type": "track_dangling"
+        },
+        {
+            "description": "Медное соединение слишком узкое (заданные ограничения платы минимальная ширина соединения 0,2000 mm; фактически 0,1700 mm) (F.Cu)",
+            "items": [
+                {
+                    "description": "Зона 'GND_F' [GND] на F.Cu, приоритет 0",
+                    "pos": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "uuid": "f1c2886a-92cf-4355-b557-d27b790e9625"
+                }
+            ],
+            "severity": "warning",
+            "type": "connection_width"
+        },
+        {
+            "description": "Медное соединение слишком узкое (заданные ограничения платы минимальная ширина соединения 0,2000 mm; фактически 0,1823 mm) (F.Cu)",
+            "items": [
+                {
+                    "description": "Зона 'GND_F' [GND] на F.Cu, приоритет 0",
+                    "pos": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "uuid": "f1c2886a-92cf-4355-b557-d27b790e9625"
+                }
+            ],
+            "severity": "warning",
+            "type": "connection_width"
         }
     ]
 }

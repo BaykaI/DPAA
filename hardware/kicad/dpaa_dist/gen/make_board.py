@@ -47,8 +47,8 @@ for fp in board.GetFootprints():
         nm = pad.GetNetname()
         x1, y1, x2, y2 = pad_rect(pad)
         ls = pad_layers(pad)
-        if not ls:                      # NPTH
-            grid.block_rect(x1, y1, x2, y2, (0, 1), -1, clr=0.45, via_clr=0.6)
+        if not ls or pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:                      # NPTH
+            grid.block_rect(x1, y1, x2, y2, (0, 1), -1, clr=0.45, via_clr=1.2)    # NPTH: отверстие-отверстие >= 0,5
             continue
         own = nid(nm) if nm and nm not in NOROUTE else -1
         grid.block_rect(x1, y1, x2, y2, ls, own)
@@ -151,8 +151,10 @@ for vx in (RES_XL - 3 * G, RES_XL + 3 * G, RES_XL + 5 * G, RES_XR - 5 * G, RES_X
     column_penalty(grid, vx, 0.1, (1,), BAN, 3.0, 134.0)
 for dx in (-2.9, 2.9):                                    # U31 TSSOP: отводы идут горизонтально
     column_penalty(grid, gu(78) + dx, 2.2, (0,), BAN, 85.0, 93.0)
-for ix in (gu(64), gu(64) + 2.54, gu(88), gu(88) + 2.54):   # колонки IDC
+for ix in (gu(66), gu(66) + 2.54, gu(86), gu(86) + 2.54):   # колонки IDC
     column_penalty(grid, ix, 0.7, (0, 1))
+for xm in (gu(66) + 1.27, gu(86) + 1.27):                 # середина между рядами J20/J21: по нижнему слою только поперёк,
+    column_penalty(grid, xm, 0.1, (1,), BAN, 9.0, 47.0)   # чтобы заливка земли под вилкой оставалась связной
 for nm, tl in terms.items():
     for ix, iy, L in tl:
         for LL in ((0, 1) if L is None else (L,)):
@@ -192,17 +194,23 @@ def padxy(ref, num):
     return place.padpos(board.FindFootprintByReference(ref), num)
 
 # шина +5V вдоль нижнего края (1,0 мм), от F2 до F4; исток Q1 — к шине
-YB = 145.65
+YB = place.gu(261)      # 165,735: нижние площадки F1/F2
 fuse_pads = {}
 for ref in ("F1", "F2", "F3", "F4"):
     fp = board.FindFootprintByReference(ref)
     ps = sorted(fp.Pads(), key=lambda q: q.GetPosition().y)
     fuse_pads[ref] = [(q.GetPosition().x / 1e6, q.GetPosition().y / 1e6) for q in ps]
-pre([fuse_pads["F2"][1], (97.79, YB), (97.79, fuse_pads["F4"][1][1]), fuse_pads["F4"][1]], "+5V", "F", PWR2)
+YB = fuse_pads["F2"][1][1]
+YDIP = 177.5                                    # обход MagJack по самому краю
+pre([fuse_pads["F2"][1], (27.5, YB), (27.5, YDIP), (49.0, YDIP), (49.0, YB), (78.0, YB)], "+5V", "F", PWR2)
+for vx in (77.0, 78.0, 82.0, 83.0):                 # пересечение с VIN: шина ныряет на нижний слой (по 2 переходных с каждой стороны)
+    pre_via(vx, YB, "+5V")
+pre([(77.0, YB), (83.0, YB)], "+5V", "B", PWR2)
+pre([(82.0, YB), (97.79, YB), (97.79, fuse_pads["F4"][1][1]), fuse_pads["F4"][1]], "+5V", "F", PWR2)
 pre([fuse_pads["F3"][1], (97.79, fuse_pads["F3"][1][1]), (97.79, YB)], "+5V", "F", PWR2)
 q1 = padxy("Q1", 2)
-pre([q1, (q1[0], YB)], "+5V", "F", PWR2)
-for ref in ("C10", "D1", "C11"):                      # накопитель, TVS, керамика — к шине +5V широкой дорожкой
+pre([q1, (72.0, q1[1]), (72.0, YB)], "+5V", "F", PWR2)
+for ref in ("C101", "D1", "C102"):                      # накопитель, TVS, керамика — к шине +5V широкой дорожкой
     fp = board.FindFootprintByReference(ref)
     for q in fp.Pads():
         if q.GetNetname() == "+5V":
@@ -212,7 +220,7 @@ for ref in ("C10", "D1", "C11"):                      # накопитель, TV
 j18 = padxy("J18", 1); q7 = padxy("Q1", 7)
 pre([j18, (80.0, j18[1]), (80.0, q7[1]), q7], "VIN", "F", PWR2)
 # 5V_A: F1 -> верхний слой x = 2,54 до J1; 5V_B: F2 -> переходное -> нижний слой x = 1,905 до J5
-pre([fuse_pads["F1"][0], (fuse_pads["F1"][0][0], 139.9), (2.54, 139.9), (2.54, place.HDR_Y0), padxy("J1", 1)], "5V_A", "F", PWR2)
+pre([fuse_pads["F1"][0], (fuse_pads["F1"][0][0], 159.4), (2.54, 159.4), (2.54, place.HDR_Y0), padxy("J1", 1)], "5V_A", "F", PWR2)
 pre_via(fuse_pads["F2"][0][0], fuse_pads["F2"][0][1], "5V_B")
 pre([fuse_pads["F2"][0], (1.905, fuse_pads["F2"][0][1]), (1.905, place.HDR_Y0 + 4 * place.HDR_DY)], "5V_B", "B", PWR2)
 # 5V_C: F3 -> верхний слой x = 97,79 до J9; 5V_D: F4 -> переходное -> нижний слой x = 98,42 до J13
@@ -287,6 +295,101 @@ def corridor_vias():
     print("переходных в коридорах", n)
 corridor_vias()
 
+# ---------------------------------------------------------------- Ethernet: пары вручную, одним слоем, 45°
+ETH_SKIP = {"ETH1_1P", "ETH1_1N", "ETH1_2P", "ETH1_2N", "ETH1_3P", "ETH1_3N", "ETH1_4P", "ETH1_4N", "CHASSIS", "ETH_CT"}
+ETH_W, ETH_NECK = 0.25, 0.2
+def jpad(num):
+    return place.padpos(board.FindFootprintByReference("J29"), num)
+def j19(dip):
+    return place.padpos(board.FindFootprintByReference("J19"), place.dip2k(dip))
+def eth_line(nm, pts, L, neck_from=None):
+    """ломаная (точки) на слое L; участок от neck_from до конца — шейка 0,2 мм (проход между площадками)"""
+    lay = 0 if L == "F" else 1
+    length = 0.0
+    for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
+        w = ETH_NECK if (neck_from is not None and y1 >= neck_from - 1e-6) else ETH_W
+        add_track(x1, y1, x2, y2, lay, nm, w)
+        length += math.hypot(x2 - x1, y2 - y1)
+        grid.block_rect(min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2), (0, 1), -1, clr=1.0, via_clr=1.2)
+    return length
+YU, YL = place.ETH_Y0, place.ETH_Y0 + 2.54           # ряды J19: верхний (1-15), нижний (16-30)
+G1, G2 = YL - 1.27, YL + 1.5                          # уровень прохода между нижними контактами, выход из него
+YN = place.JACK_Y - 1.2                               # начало шейки перед внутренним рядом площадок
+xg = lambda dip: j19(dip)[0]
+eth_len = {}
+# пара 1 (F, верхний ряд): 1P -> R2 (внешний ряд, через проход 33,65), 1N -> R3 (внутренний, прямо через проход)
+x1p, x1n = xg(4), xg(3)
+eth_len["ETH1_1P"] = eth_line("ETH1_1P", [(x1p, YU), (x1p - 1.27, G1), (x1p - 1.27, G2), (x1p, G2 + 1.27), (x1p, YN), jpad("R2")], "F", YN)
+eth_len["ETH1_1N"] = eth_line("ETH1_1N", [(x1n, YU), (x1n - 1.27, G1), jpad("R3")], "F")
+# пара 2 (F, обратная полярность): 2N -> R4 (внешний), 2P -> R5 (внутренний)
+x2p, x2n = xg(1), xg(2)
+eth_len["ETH1_2N"] = eth_line("ETH1_2N", [(x2n, YU), (x2n - 1.27, G1), (x2n - 1.27, G2), (x2n - 2.54, G2 + 1.27), (x2n - 2.54, YN), jpad("R4")], "F", YN)
+eth_len["ETH1_2P"] = eth_line("ETH1_2P", [(x2p, YU), (x2p - 1.27, G1), (x2p - 1.27, G2), (x2p - 3.81, G2 + 2.54), jpad("R5")], "F")
+# пара 3 (B, нижний ряд): 3P -> R6 (внешний), 3N -> R7 (внутренний)
+x3p, x3n = xg(27), xg(28)
+r6, r7 = jpad("R6"), jpad("R7")
+eth_len["ETH1_3P"] = eth_line("ETH1_3P", [(x3p, YL), (x3p, G2 - 0.6), (r6[0], G2 - 0.6 + (r6[0] - x3p)), (r6[0], YN), r6], "B", YN)
+eth_len["ETH1_3N"] = eth_line("ETH1_3N", [(x3n, YL), (x3n, G2 - 0.6), (r7[0], G2 - 0.6 + (r7[0] - x3n)), r7], "B")
+# пара 4 (B, обратная полярность): 4N -> R8 (внешний), 4P -> R9 (внутренний)
+x4p, x4n = xg(30), xg(29)
+r8, r9 = jpad("R8"), jpad("R9")
+eth_len["ETH1_4N"] = eth_line("ETH1_4N", [(x4n, YL), (x4n, G2 - 0.6), (r8[0], G2 - 0.6 + (r8[0] - x4n)), (r8[0], YN), r8], "B", YN)
+eth_len["ETH1_4P"] = eth_line("ETH1_4P", [(x4p, YL), (x4p, G2 - 0.6), (r9[0], G2 - 0.6 + (r9[0] - x4p)), r9], "B")
+# центральный отвод R1 -> C301 -> R301; земля R10 — вверх к полигону
+r1 = jpad("R1"); c301 = place.padpos(board.FindFootprintByReference("C301"), 1); r301 = place.padpos(board.FindFootprintByReference("R301"), 1)
+d = r1[1] - c301[1]
+eth_line("ETH_CT", [r1, (c301[0] + d, r1[1]), c301, (c301[0] - 0.94, c301[1] - 0.94), (c301[0] - 0.94, r301[1] + 0.94), r301], "F")
+open(os.path.join(HERE, "eth_lengths.txt"), "w", encoding="utf-8").write(
+    "\n".join("%s %.2f мм" % (k, v) for k, v in sorted(eth_len.items())) + "\n")
+print("Ethernet: длины пар", {k: round(v, 1) for k, v in sorted(eth_len.items())})
+# зона корпуса под MagJack — запрет для трассировщика (и земли): всё, кроме своих площадок
+grid.block_rect(place.JACK_X - 4.0, place.JACK_Y - 2.6, place.JACK_X + 15.4, H, (0, 1), -1, clr=0.0, via_clr=0.3)
+_c306 = place.padpos(board.FindFootprintByReference("C306"), 2); _r306 = place.padpos(board.FindFootprintByReference("R306"), 1)
+grid.block_rect(_c306[0] - 0.9, _c306[1] - 1.3, _r306[0] + 0.6, place.JACK_Y + 2.5, (0, 1), -1, clr=0.0, via_clr=0.3)
+
+# развязка буферов: площадка земли каждого C1..C13 — сразу на переходное к нижнему слою
+for n in range(1, 14):
+    fp = board.FindFootprintByReference("C%d" % n)
+    cx, cy = fp.GetPosition().x / 1e6, fp.GetPosition().y / 1e6
+    for q in fp.Pads():
+        if q.GetNetname() == "GND":
+            px, py = q.GetPosition().x / 1e6, q.GetPosition().y / 1e6
+            vx = cx + 3 * G if px > cx else cx - 3 * G
+            pre([(px, py), (vx, py)], "GND", "F", TRK)
+            pre_via2(vx, py, "GND")
+
+# земляные контакты вилок IDC: объединить дорожкой вдоль ряда (чтобы на полигон вышел любой из них)
+def idc_gnd_bus(ref):
+    fp = board.FindFootprintByReference(ref)
+    pads = {int(p.GetNumber()): (p.GetPosition().x / 1e6, p.GetPosition().y / 1e6, p.GetNetname()) for p in fp.Pads()}
+    ax, ay = pads[1][0], pads[1][1]; bx, by = pads[2][0], pads[2][1]
+    ux, uy = (ax - bx) / 2.54, (ay - by) / 2.54          # от ряда B к ряду A (единичный)
+    cx, cy = pads[3][0] - ax, pads[3][1] - ay            # шаг колонок (вектор 2,54)
+    cols = sorted({(w + 1) // 2 for w, (x, y, n) in pads.items() if n == "GND"})
+    def col_pos(c, row):
+        base = pads[1] if row == "A" else pads[2]
+        return (base[0] + (c - 1) * cx, base[1] + (c - 1) * cy)
+    # магистраль на 1,27 снаружи ряда A, от первой до последней земляной колонки
+    p0 = col_pos(cols[0], "A"); p1 = col_pos(cols[-1], "A")
+    off = (ux * 1.27, uy * 1.27)
+    pre([(p0[0] + off[0], p0[1] + off[1]), (p1[0] + off[0], p1[1] + off[1])], "GND", "F", TRK)
+    for c in cols:
+        wa, wb = 2 * c - 1, 2 * c
+        pa, pb = col_pos(c, "A"), col_pos(c, "B")
+        if pads[wa][2] == "GND":
+            pre([pa, (pa[0] + off[0], pa[1] + off[1])], "GND", "F", TRK)
+            if pads[wb][2] == "GND":
+                pre([pb, pa], "GND", "F", TRK)
+        elif pads[wb][2] == "GND":                        # только внутренний ряд: наискось в зазор и сквозь ряд A
+            gx, gy = pb[0] + cx / 2 + ux * 1.27, pb[1] + cy / 2 + uy * 1.27
+            pre([pb, (gx, gy), (gx + off[0] * 2, gy + off[1] * 2)], "GND", "F", TRK)
+for ref in ("J19",):
+    idc_gnd_bus(ref)
+
+# земля справа от MagJack (между chassis-зоной и J26) — сшить с нижним слоем
+for (vx, vy) in ((53.5, 160.0), (56.0, 162.0)):
+    pre_via(vx, vy, "GND")
+
 # 3V3_MIC: по низу — верхний слой y = 138,9 (нижний слой под ним свободен для пересечений), вверх вдоль краёв — нижний слой
 Y3 = 138.9
 pre([(3.81, Y3), (96.52, Y3)], "3V3_MIC", "F", PWR)
@@ -306,9 +409,20 @@ def route_one(nm, maxexp=1500000):
             i = grid.idx(ix, iy)
             if grid.occ[LL][i] in (0, nid(nm)):
                 grid.occ[LL][i] = nid(nm)
-    return rt.route_net(nid(nm), tl, width=width_of(nm), maxexp=maxexp, preset=PRE.get(nm, ()))
+    preset = set(PRE.get(nm, ()))
+    if nm == "GND":
+        preset |= set(rt.net_cells.get(nid(nm), ()))
+    return rt.route_net(nid(nm), tl, width=width_of(nm), maxexp=maxexp, preset=preset)
 
-queue = [n for n in names if n != 'GND']      # земля — после всех перекладок
+# земля выводов вилок IDC — заранее, пока плата пустая: деревом к переходным развязки буферов
+idc_gnd = []
+for ref in ("J19", "J20", "J21"):
+    fp = board.FindFootprintByReference(ref)
+    for q in fp.Pads():
+        if q.GetNetname() == "GND":
+            ix, iy = grid.cell(q.GetPosition().x / 1e6, q.GetPosition().y / 1e6)
+            idc_gnd.append((ix, iy, None))
+queue = [n for n in names if n != 'GND' and n not in ETH_SKIP]      # земля — после всех перекладок; Ethernet — вручную
 failed_final = []
 iters = 0
 ripped_count = {}
@@ -351,9 +465,36 @@ for _pass in range(4):
             failed_final.append(nm)
     print("финальный проход %d: осталось %d" % (_pass + 1, len(failed_final)))
 # земля: деревом по остаткам свободного места (остальное доберут полигоны и сшивающие переходные)
-rt.ripup(nid("GND"))
-gnd_ok = route_one("GND", maxexp=3000000)
+gnd_ok = route_one("GND", maxexp=3000000)        # без снятия: ранняя часть дерева остаётся
 print("земля: проложена полностью" if gnd_ok else "земля: часть площадок — только через полигоны")
+# непроложенные площадки земли: переходное в ближайшей свободной ячейке + короткая дорожка к нему
+gnd_fix = 0
+for nd, t, why in list(rt.fail):
+    if id2name[nd] != "GND":
+        continue
+    ix0, iy0, L0 = t
+    cands = sorted(((abs(dx) + abs(dy), ix0 + dx, iy0 + dy) for dx in range(-8, 9) for dy in range(-8, 9) if (dx or dy)), key=lambda c: c[0])
+    for _, jx, jy in cands:
+        if not (0 <= jx < grid.nx and 0 <= jy < grid.ny):
+            continue
+        j = grid.idx(jx, jy)
+        if not grid.via_ok[j] or grid.occ[0][j] != 0 or grid.occ[1][j] != 0:
+            continue
+        # на нижнем слое вокруг должна быть открытая земля (радиус 2 ячейки свободен), иначе переходное попадёт в островок
+        if any(grid.occ[1][grid.idx(jx + ex, jy + ey)] not in (0, nid("GND")) for ex in range(-2, 3) for ey in range(-2, 3)
+               if 0 <= jx + ex < grid.nx and 0 <= jy + ey < grid.ny):
+            continue
+        v = pre_via2(jx * G, jy * G, "GND")
+        rt.fail = [f for f in rt.fail if f[1] != t]
+        if rt.route_net(nid("GND"), [(jx, jy, None), t], width=TRK, maxexp=200000):
+            gnd_fix += 1
+            break
+        rt.fail = [f for f in rt.fail if f[1] != t]
+        board.Remove(v)                                   # не вышло — переходное убрать, ячейки освободить
+        for L in (0, 1):
+            if grid.occ[L][j] == nid("GND"):
+                grid.occ[L][j] = 0
+print("земля: доработано площадок переходными", gnd_fix)
 bad = sorted({id2name[nd] for nd, t, _ in rt.fail if id2name[nd] != "GND"} | set(failed_final))
 print("трассировка %.0f с, итераций %d, не удалось: %d %s" % (time.time() - t0, iters, len(bad), bad[:20]))
 
@@ -409,8 +550,16 @@ def zone(points, netname, layer):
     except Exception:
         pass
     board.Add(z)
+    return z
 for L in (F, B):
     zone([(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)], "GND", L)
+JX, JY = place.JACK_X, place.JACK_Y
+c306 = place.padpos(board.FindFootprintByReference("C306"), 2); r306 = place.padpos(board.FindFootprintByReference("R306"), 1)
+z = zone([(JX - 3.9, JY - 2.3), (JX + 15.3, JY - 2.3), (JX + 15.3, 176.3), (JX - 3.9, 176.3)], "CHASSIS", B)
+z.SetAssignedPriority(1)
+z = zone([(JX - 3.9, JY - 2.3), (c306[0] - 0.9, JY - 2.3), (c306[0] - 0.9, c306[1] - 1.1), (r306[0] + 0.6, c306[1] - 1.1),
+          (r306[0] + 0.6, JY + 2.5), (JX + 15.3, JY + 2.5), (JX + 15.3, 176.3), (JX - 3.9, 176.3)], "CHASSIS", F)   # c306 = площадка 2 (CHASSIS)
+z.SetAssignedPriority(1)
 for fp in board.GetFootprints():
     if fp.GetAttributes() & pcbnew.FP_THROUGH_HOLE:
         fp.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)

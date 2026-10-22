@@ -6,7 +6,7 @@ import pcbnew
 from pcbnew import VECTOR2I, FromMM as mm
 
 LIB = r"C:\Program Files\KiCad\10.0\share\kicad\footprints"
-W, H = 100.0, 160.0
+W, H = 100.0, 180.0
 G = 0.635
 F, B = pcbnew.F_Cu, pcbnew.B_Cu
 
@@ -125,9 +125,14 @@ P3 = {3: "MIC0", 4: "MIC1", 5: "MIC2", 6: "MIC3", 7: "MIC4", 9: "MIC5", 12: "MIC
       25: "CAL", 26: "BTN_TEST", 27: "ESP_RX", 28: "ESP_TX"}
 PWR = {2: "GND", 8: "GND", 11: "GND", 20: "GND", 29: "GND"}     # 1,10,21,30 (3V3) и 23 (5V) не подключаются
 
-def idc(ref, x, y, sig):
-    nets = dict(PWR); nets.update(sig)
-    return place("Connector_IDC", "IDC-Header_2x15_P2.54mm_Vertical", ref, x, y, 0, "IDC 2x15", nets,
+def dip2k(d):
+    """Контакт гребёнки платы расширения (1-15 один ряд, 16-30 другой, 30 напротив 1) -> контакт
+    вилки IDC по зигзагу футпринта (1,2 в первой колонке...). Прямой шлейф соединяет контакты по положению."""
+    return 2 * d - 1 if d <= 15 else 2 * (31 - d)
+
+def idc(ref, x, y, sig, rot=0):
+    nets = {dip2k(d): n for d, n in list(PWR.items()) + list(sig.items())}
+    return place("Connector_IDC", "IDC-Header_2x15_P2.54mm_Vertical", ref, x, y, rot, "IDC 2x15", nets,
                  "вилка IDC 2x15 с ключом")
 
 # ---------------------------------------------------------------- сборка
@@ -164,6 +169,7 @@ def build():
     audio()
     power()
     misc()
+    ethernet()
 
 def audio():
     # ЦАП PCM5102A (TSSOP-20, выводы вдоль y) и драйвер наушников TDA1308
@@ -196,8 +202,8 @@ def audio():
           {1: "HP_L_O", 2: "HP_L"}, "электролит 220 мкФ 6,3 В")
     place("Capacitor_THT", "CP_Radial_D6.3mm_P2.50mm", "C45", x2 + gu(14), y2 + gu(2), 90, "220u",
           {1: "HP_R_O", 2: "HP_R"}, "электролит 220 мкФ 6,3 В")
-    for ref, xj in (("J26", gu(53)), ("J27", gu(75))):
-        place("Connector_Audio", "Jack_3.5mm_CUI_SJ1-3523N_Horizontal", ref, xj, gu(242), 0, "3.5mm",
+    for ref, xj in (("J26", gu(92)), ("J27", gu(114))):
+        place("Connector_Audio", "Jack_3.5mm_CUI_SJ1-3523N_Horizontal", ref, xj, gu(273), 0, "3.5mm",
               {"T": "HP_L", "R": "HP_R", "S": "GND"}, "гнездо 3,5 мм стерео")
         fpj = board.FindFootprintByReference(ref)
         for it in list(fpj.GraphicalItems()):
@@ -206,19 +212,19 @@ def audio():
 
 def power():
     # вход 5 В у правого нижнего края, защита, накопитель; предохранители и стабилизаторы — над ним
-    place("Connector_BarrelJack", "BarrelJack_Horizontal", "J18", gu(138), gu(246), 270, "5.5/2.1",
+    place("Connector_BarrelJack", "BarrelJack_Horizontal", "J18", gu(138), gu(278), 270, "5.5/2.1",
           {1: "VIN", 2: "GND", 3: "GND"}, "гнездо питания 5,5/2,1")
     place("Package_SO", "SOIC-8_3.9x4.9mm_P1.27mm", "Q1", gu(120), gu(238), 0, "AO4407A",
           {1: "+5V", 2: "+5V", 3: "+5V", 4: "GND", 5: "VIN", 6: "VIN", 7: "VIN", 8: "VIN"}, "P-MOSFET, защита от переполюсовки")
     d1 = place("Diode_SMD", "D_SMB", "D1", gu(110), gu(238), 90, "SMBJ5.0A", None, "TVS 5 В, SMB")
     dp = sorted(d1.Pads(), key=lambda q: q.GetPosition().y)
-    dp[0].SetNet(net("+5V")); dp[1].SetNet(net("GND"))      # катод (1) сверху: анод к земле
-    place("Capacitor_THT", "CP_Radial_D10.0mm_P5.00mm", "C10", gu(94), gu(238), 0, "1000u",
+    dp[1].SetNet(net("+5V")); dp[0].SetNet(net("GND"))      # катод снизу (к шине +5V у нижнего края), анод к земле
+    place("Capacitor_THT", "CP_Radial_D10.0mm_P5.00mm", "C101", gu(94), gu(238), 0, "1000u",
           {1: "+5V", 2: "GND"}, "электролит 1000 мкФ 10 В")
-    c0805("C11", gu(122), gu(245), "+5V", "GND", 0, "10u")
+    c0805("C102", gu(122), gu(245), "+5V", "GND", 0, "10u")
     # предохранители у краёв: F1 (5V_A: J1-J4) и F2 (5V_B: J5-J8) слева внизу, F3 (5V_C), F4 (5V_D) справа внизу
-    for ref, grp, x, y in (("F1", "5V_A", gu(12), gu(226)), ("F2", "5V_B", gu(4), gu(226)),
-                           ("F3", "5V_C", gu(150), gu(224)), ("F4", "5V_D", gu(150), gu(235))):
+    for ref, grp, x, y in (("F1", "5V_A", gu(12), gu(258)), ("F2", "5V_B", gu(4), gu(258)),
+                           ("F3", "5V_C", gu(150), gu(256)), ("F4", "5V_D", gu(150), gu(267))):
         fp = place("Fuse", "Fuse_1812_4532Metric", ref, x, y, 90, "PTC 1.5A", None, "самовосстанавливающийся предохранитель 1812")
         pads = sorted(fp.Pads(), key=lambda q: q.GetPosition().y)
         pads[0].SetNet(net(grp)); pads[1].SetNet(net("+5V"))         # верхняя площадка — к гребёнкам, нижняя — шина +5V
@@ -242,7 +248,7 @@ def power():
 
 def misc():
     # J17 — RJ45 зонда у нижнего края слева; J25 — ESP32; SW1 — кнопка «тест»
-    place("Connector_RJ", "RJ45_Amphenol_54602-x08_Horizontal", "J17", gu(22), gu(236), 0, "RJ45",
+    place("Connector_RJ", "RJ45_Amphenol_54602-x08_Horizontal", "J17", gu(22), gu(268), 0, "RJ45",
           {1: "BCLK_P", 2: "GND", 3: "LRC_P", 4: "3V3_MIC", 5: "3V3_MIC", 6: "GND", 7: "CAL_IN", 8: "GND"},
           "RJ45 зонда")
     place("Connector_PinHeader_2.54mm", "PinHeader_1x03_P2.54mm_Vertical", "J25", gu(66), gu(118), 0, "ESP32",
@@ -253,5 +259,32 @@ def misc():
           {1: "BTN_TEST", 2: "3V3L"}, "кнопка тактовая 6x6")
     text("TEST", gu(88), gu(130), size=1.0)
     text("ESP32 TX RX GND", gu(66) - 3.0, gu(120), size=0.8, thick=0.12, rot=90)
-    text("DPAA dist. board v1  2026-10", gu(78), gu(224), size=1.2)
-    text("ЗОНД RJ45", gu(22) + 6, gu(226), size=1.0)
+    text("DPAA dist. board v1  2026-10", gu(36), gu(220), size=1.2)
+    text("ЗОНД RJ45", gu(22) + 6, gu(258), size=1.0)
+
+
+# ---------------------------------------------------------------- Ethernet: гребёнка P1 платы расширения -> MagJack
+# P1: пары MDI после PHY B50612D (ETH1), контакты по схеме платы расширения (нумерация 1-15/16-30)
+P1 = {1: "ETH1_2P", 2: "ETH1_2N", 3: "ETH1_1N", 4: "ETH1_1P", 27: "ETH1_3P", 28: "ETH1_3N", 29: "ETH1_4N", 30: "ETH1_4P",
+      5: "GND", 14: "GND", 17: "GND", 23: "GND", 26: "GND"}        # 6/15/16/25 (3V3), 8 (5V), 7/9/22/24 (NC), 10-13/18-21 (ETH2) не подключены
+ETH_X0, ETH_Y0 = gu(65), gu(232)       # J19: контакт 1 справа (rot 270): ряд 1-15 сверху (y0), ряд 16-30 снизу (y0+2,54)
+JACK_X, JACK_Y = gu(51), 160.5         # J29: начало футпринта (R1), лицевая сторона — к нижнему краю
+
+def ethernet():
+    idc("J19", ETH_X0, ETH_Y0, P1, 270)
+    text("P1 (ETH)", ETH_X0 - 17.0, ETH_Y0 - 6.0, size=1.2)
+    # MagJack UDE RB1-125B8G1A: R1 — общий центральный отвод (сторона PHY), R2..R9 — TD1..TD4, R10 — земля
+    # встроенной терминации Боба Смита (75 Ом + 1000 пФ 2 кВ внутри) — на chassis, SH — экран (chassis). Пары 2 и 4
+    # подключены с обратной полярностью (так нет пересечений; PHY исправляет полярность автоматически).
+    nets = {"R1": "ETH_CT", "R2": "ETH1_1P", "R3": "ETH1_1N", "R4": "ETH1_2N", "R5": "ETH1_2P",
+            "R6": "ETH1_3P", "R7": "ETH1_3N", "R8": "ETH1_4N", "R9": "ETH1_4P", "R10": "CHASSIS", "SH": "CHASSIS"}
+    place("Connector_RJ", "RJ45_UDE_RB1-125B8G1A", "J29", JACK_X, JACK_Y, 0, "RB1-125B8G1A", nets,
+          "RJ45 MagJack 1000BASE-T с трансформаторами (UDE RB1-125B8G1A)")
+    text("ETH", JACK_X + 5.0, JACK_Y - 4.5, size=1.2)
+    # центральный отвод: 100 нФ на землю; R301 0 Ом (не ставить) — к 3,3 В, если PHY с токовым выходом
+    c0603("C301", gu(44), gu(251), "ETH_CT", "GND", 90, "100n")
+    r = r0603("R301", gu(44), gu(246), "ETH_CT", "3V3L", 90, "0R DNP")
+    r.SetDNP(True)
+    # chassis <-> GND: 1 МОм || 1 нФ 2 кВ
+    place("Capacitor_SMD", "C_1812_4532Metric", "C306", gu(73), gu(245), 0, "1n 2kV", {1: "GND", 2: "CHASSIS"}, "конденсатор 1812 1 нФ 2 кВ")
+    r0603("R306", gu(82), gu(245), "CHASSIS", "GND", 0, "1M")

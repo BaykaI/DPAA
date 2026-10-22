@@ -1128,13 +1128,13 @@
   "TVS 5 В, SMB"
  ],
  [
-  "C10",
+  "C101",
   "1000u",
   "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm",
   "электролит 1000 мкФ 10 В"
  ],
  [
-  "C11",
+  "C102",
   "10u",
   "Capacitor_SMD:C_0805_2012Metric",
   "конденсатор 0805"
@@ -1258,5 +1258,41 @@
   "кнопка",
   "Button_Switch_SMD:SW_Push_1TS009xxxx-xxxx-xxxx_6x6x5mm",
   "кнопка тактовая 6x6"
+ ],
+ [
+  "J19",
+  "IDC 2x15",
+  "Connector_IDC:IDC-Header_2x15_P2.54mm_Vertical",
+  "вилка IDC 2x15 с ключом"
+ ],
+ [
+  "J29",
+  "RB1-125B8G1A",
+  "Connector_RJ:RJ45_UDE_RB1-125B8G1A",
+  "RJ45 MagJack 1000BASE-T с трансформаторами (UDE RB1-125B8G1A)"
+ ],
+ [
+  "C301",
+  "100n",
+  "Capacitor_SMD:C_0603_1608Metric",
+  "конденсатор 0603"
+ ],
+ [
+  "R301",
+  "0R DNP",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
+ ],
+ [
+  "C306",
+  "1n 2kV",
+  "Capacitor_SMD:C_1812_4532Metric",
+  "конденсатор 1812 1 нФ 2 кВ"
+ ],
+ [
+  "R306",
+  "1M",
+  "Resistor_SMD:R_0603_1608Metric",
+  "резистор 0603"
  ]
 ]

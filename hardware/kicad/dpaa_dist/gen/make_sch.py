@@ -47,6 +47,8 @@ PIN_NAMES = {
  "5.5/2.1": {"1": "+", "2": "-", "3": "SW"},
  "3.5mm": {"T": "TIP", "R": "RING", "S": "SLEEVE"},
  "LED": {"1": "K", "2": "A"},
+ "RB1-125B8G1A": {"R1": "CT", "R2": "TD1+", "R3": "TD1-", "R4": "TD2+", "R5": "TD2-", "R6": "TD3+", "R7": "TD3-", "R8": "TD4+",
+                  "R9": "TD4-", "R10": "BS GND", "SH": "SHIELD", "L1": "LED Y-", "L2": "LED Y+", "L3": "LED G-", "L4": "LED G+"},
  "SMBJ5.0A": {"1": "K", "2": "A"},
 }
 # подписи контактов гребёнок элементов и шлейфов
@@ -58,10 +60,10 @@ def pin_layout(c):
     """-> список (num, name, side) и размеры символа."""
     v = c["value"]; ref = c["ref"]; pads = c["pads"]
     names = PIN_NAMES.get(v, {})
-    if ref.startswith("J") and ref not in ("J17", "J18", "J25", "J26", "J27"):
+    if ref.startswith("J") and ref not in ("J17", "J18", "J25", "J26", "J27", "J29"):
         out = []
         for num, nn in pads:
-            nm = J_EL.get(num, "") if int(num) <= 12 and ref not in ("J20", "J21") else ""
+            nm = J_EL.get(num, "") if ref not in ("J19", "J20", "J21") else ""
             out.append((num, nm, "L" if int(num) % 2 == 1 else "R"))
         return out
     if len(pads) == 2 or ref.startswith(("R", "C", "F", "FB", "LED", "D", "SW")):
@@ -115,6 +117,8 @@ for c in comps:
         g = "elem"
     elif r in ("J20", "J21", "J17", "J25", "SW1", "R201", "R202", "R203", "R204", "R205", "R206"):
         g = "fpga"
+    elif r in ("J19", "J29", "C301", "R301", "C306", "R306"):
+        g = "eth"
     elif r.startswith("R") and len(r) <= 4 and r[1:].isdigit() and int(r[1:]) < 200:
         g = "elem"
     elif r.startswith("C") and r[1:].isdigit() and int(r[1:]) <= 13:
@@ -166,6 +170,7 @@ X = place_group(groups["buf"], X + 4, 25, 0, 50)
 X = place_group(groups["fpga"], X + 4, 25, 0, 52)
 X = place_group(groups["audio"], X + 4, 25, 0, 48)
 X = place_group(groups["power"], X + 4, 25, 0, 48)
+X = place_group(groups["eth"], X + 4, 25, 0, 52)
 
 # ---------------------------------------------------------------- вывод файла
 out = ['(kicad_sch (version 20250114) (generator "dpaa_gen") (generator_version "10.0") (uuid "%s") (paper "A1")' % U(),
